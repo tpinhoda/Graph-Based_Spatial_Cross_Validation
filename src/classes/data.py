@@ -5,7 +5,7 @@ import shutil
 from dataclasses import dataclass
 from os import mkdir, listdir, remove, rename
 from os.path import join, isfile
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import List
 
 
@@ -17,14 +17,6 @@ class Data(ABC):
 
     Attributes
     ----------
-        region : str
-            Name of the region described by the dataset
-        data_name: str
-            Name of the data
-        aggregation_level: str
-            Geographic aggregation level
-        desc: str
-            Data description
         root_path : str
             Root path
         cur_dir: str
@@ -34,10 +26,6 @@ class Data(ABC):
 
     """
 
-    region: str = None
-    data_name: str = None
-    aggregation_level: str = None
-    desc: str = None
     root_path: str = None
     cur_dir: str = None
     logger_name: str = None
@@ -68,21 +56,15 @@ class Data(ABC):
             pass
             # logger.info(f"Entering folder: /{folder_name}")
 
-    def _make_initial_folders(self) -> None:
+    def _set_cur_dir(self) -> None:
         """Creates the initial folds to store the dataset"""
         self.logger_info(f"Root: {self.root_path}")
         self.logger_info("Creating or Entering dataset folders.")
         self.cur_dir = self.root_path
-        self._mkdir(folder_name=self.region)
-        self._mkdir(folder_name=self.data_name)
-        self._mkdir(folder_name=self.aggregation_level)
 
-    def _get_initial_folders_path(self) -> str:
+    def _get_root_path(self) -> str:
         """Returns the initial folders path"""
-        return join(self.root_path, self.region)
-
-    def _get_data_name_folders_path(self) -> str:
-        return join(self.root_path, self.region, self.data_name)
+        return self.root_path
 
     def _get_files_in_cur_dir(self) -> List[str]:
         """Returns a list of filesnames in the current directory"""
@@ -138,10 +120,6 @@ class Data(ABC):
 
     def _make_folders(self, folders: List[str]):
         """Make the initial folders"""
-        self._make_initial_folders()
+        self._set_cur_dir()
         for folder in folders:
             self._mkdir(folder)
-
-    @abstractmethod
-    def run(self):
-        """Run the process"""
