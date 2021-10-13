@@ -1,9 +1,9 @@
 """Main script"""
 import os
 from pathlib import Path
-from src.classes.optimistic import OPTMISTIC
-from src.classes.ultra_coservative import ULTRACONSERVATIVE
-from src.classes.gbscv import GBSCV
+from src.methods.optimistic import OPTMISTIC
+from src.methods.ultra_coservative import ULTRACONSERVATIVE
+from src.methods.gbscv import GBSCV
 import pandas as pd
 from src import utils
 import rich
@@ -32,26 +32,43 @@ def main():
     adj_matrix = pd.read_csv(
         os.path.join(env_var["root_path"], "queen_matrix.csv"), low_memory=False
     )
+    # Remove lat lon cols
+    data.drop(columns=[lat_col, lon_col], inplace=True)
+    # Set index cols
     adj_matrix.set_index(adj_matrix.columns[0], inplace=True)
     # Creates and run the meshblock processing pipeline
-    gbscv = GBSCV(
+    #gbscv = GBSCV(
+    #    data=data,
+    #    fold_col=index_folds,
+    #    target_col=target,
+    #    adj_matrix=adj_matrix,
+    #    root_path=env_var["root_path"],
+    #)
+    #gbscv.create_folds(
+    #    run_selection=True,
+    #    name_folds="selection_removing_buffer_folds",
+    #    kappa=20,
+    #)
+    
+    #optmistic = OPTMISTIC(
+    #    data=data,
+    #    fold_col=index_folds,
+    #    root_path=env_var["root_path"],
+    #)
+    #optmistic.create_folds(
+    #    name_folds="optmistic_folds",
+    #)
+    conservative = ULTRACONSERVATIVE(
         data=data,
-        target_col=target,
         fold_col=index_folds,
-        lat_col=lat_col,
-        lon_col=lon_col,
+        target_col=target,
         adj_matrix=adj_matrix,
         root_path=env_var["root_path"],
     )
-    gbscv.create_folds(
-        run_selection=1,
-        name_folds="selection_removing_buffer_folds",
-        kappa=20,
-        weights="non-spatial",
-        decay="log",
+    conservative.create_folds(
+        name_folds="ultra_conservative_folds",
     )
-    # gbscv.create_folds()
-
+    
 
 if __name__ == "__main__":
     main()

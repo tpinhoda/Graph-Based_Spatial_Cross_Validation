@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Abstract class to represent meshblocks data."""
+"""Abstract class to represent the file data."""
 import logging
 import shutil
 from dataclasses import dataclass
@@ -11,9 +11,9 @@ from typing import List
 
 @dataclass
 class Data(ABC):
-    """Represents meshblock data.
+    """Represents file data.
 
-    This class is responsible to organize in folders the meshblock data.
+    This class is responsible to organize the data in folders.
 
     Attributes
     ----------

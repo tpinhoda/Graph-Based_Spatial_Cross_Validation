@@ -1,4 +1,4 @@
-"""Generate raw data for census"""
+"""Generate graph-based cross-validation spatial folds"""
 import os
 import json
 import time
@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import haversine_distances
 from tqdm import tqdm
-from src.classes.data import Data
+from src.scv import SCV
 
 
 X_1DIM_COL = "X_1DIM"
@@ -18,23 +18,16 @@ Y = "y"
 
 
 @dataclass
-class GBSCV(Data):
+class GBSCV(SCV):
     """Generates the graph based spatial cross-validation folds
     Attributes
     ----------
-        data: pd.Dataframe
-            The spatial dataset to generate the folds
         target_col: str
             The targer attribute column name
-        lat_col: str
-            The latitude column name
-        lon_col: str
-            The longitude column name
-        adh_matrix: pd.Dataframe
+        adj_matrix: pd.Dataframe
             The adjacency matrix regarding the spatial objects in the data
     """
 
-    data: pd.DataFrame = field(default_factory=pd.DataFrame)
     target_col: str = "TARGET"
     fold_col: str = "FOLD_INDEX"
     lat_col: str = "[GEO]_LATITUDE"
@@ -48,13 +41,6 @@ class GBSCV(Data):
     def _get_index_train(self, index_test) -> List:
         """Return the train set indexes based on the test set indexes"""
         return [idx for idx in self.data.index if idx not in index_test]
-
-    def _get_fold_x_y(self, index) -> Dict:
-        """Return the data separeted by explanatory and target attributes"""
-        return {
-            X: self.data.loc[index].copy(),
-            Y: self.data.loc[index, self.target_col].copy(),
-        }
 
     def _calculate_train_pca(self) -> np.array:
         """Return the PCA first component transformation on the traind data"""
@@ -261,22 +247,20 @@ class GBSCV(Data):
 
     def create_folds(
         self,
-        run_selection=1,
+        run_selection=True,
         name_folds="folds",
         kappa=20,
         weights="non-spatial",
         decay="log",
     ):
-        """Generate merged data"""
+        """Generate graph-based spatial folds"""
         # Create folder folds
         start_time = time.time()
         self._make_folders(["folds", name_folds])
         self.data[X_1DIM_COL] = self._calculate_train_pca()
         self._convert_latlon_2_radians()
-        for fold_name, test_data in tqdm(self.data.groupby(by=self.fold_col)):
+        for fold_name, test_data in tqdm(self.data.groupby(by=self.fold_col), desc="Creating folds:"):
             # Cread fold folder
-            # fold_name = 26
-            # test_data = self.data[self.data[self.fold_col] == fold_name]
             self._mkdir(str(fold_name))
             # Initialize x , y and reduce
             self._split_data_test_train(test_data)
