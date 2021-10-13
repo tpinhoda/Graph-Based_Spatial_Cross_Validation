@@ -7,6 +7,7 @@ from typing import List
 import pandas as pd
 from src.data import Data
 
+
 @dataclass
 class SCV(Data, ABC):
     """Represents the Spatial Cross Validation.
@@ -65,10 +66,7 @@ class SCV(Data, ABC):
         path_to_save = os.path.join(self.cur_dir, "split_data.json")
         with open(path_to_save, "w", encoding="utf-8") as file:
             json.dump(split_data, file, indent=4)
-    
+
     @abstractmethod
-    def create_folds(self,
-                     run_selection=True,
-                     name_folds="gbscv",
-                     kappa=20):
+    def create_folds(self, run_selection=True, name_folds="gbscv", kappa=20):
         """Generate graph-based spatial folds"""

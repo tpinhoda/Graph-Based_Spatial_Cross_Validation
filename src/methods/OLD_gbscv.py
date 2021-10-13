@@ -259,7 +259,9 @@ class GBSCV(SCV):
         self._make_folders(["folds", name_folds])
         self.data[X_1DIM_COL] = self._calculate_train_pca()
         self._convert_latlon_2_radians()
-        for fold_name, test_data in tqdm(self.data.groupby(by=self.fold_col), desc="Creating folds:"):
+        for fold_name, test_data in tqdm(
+            self.data.groupby(by=self.fold_col), desc="Creating folds:"
+        ):
             # Cread fold folder
             self._mkdir(str(fold_name))
             # Initialize x , y and reduce

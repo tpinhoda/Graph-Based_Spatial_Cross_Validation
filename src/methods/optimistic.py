@@ -5,9 +5,10 @@ from dataclasses import dataclass
 from tqdm import tqdm
 from src.scv import SCV
 
+
 @dataclass
 class OPTMISTIC(SCV):
-    """Represents the Optmistic Spatial Cross Validation, without considering
+    """Represents the Optmistic Spatial Cross-Validation, without considering
     the removing buffer.
 
      Attributes
@@ -20,7 +21,9 @@ class OPTMISTIC(SCV):
             Root path
     """
 
-    def create_folds(self, run_selection=None, name_folds="optmistic", kappa=None) -> None:
+    def create_folds(
+        self, run_selection=None, name_folds="optmistic", kappa=None
+    ) -> None:
         """Generate merged data"""
         # Create folder folds
         start_time = time.time()

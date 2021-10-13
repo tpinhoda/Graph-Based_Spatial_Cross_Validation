@@ -12,9 +12,10 @@ from src.scv import SCV
 
 X_1DIM_COL = "X_1DIM"
 
+
 @dataclass
 class GBSCV(SCV):
-    """Generates the graph based spatial cross-validation folds
+    """Generates the Graph Based Spatial Cross-Validation folds
     Attributes
     ----------
         data: pd.Dataframe
@@ -33,7 +34,6 @@ class GBSCV(SCV):
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     _sill_target: Dict = field(default_factory=dict)
     _sill_reduced: Dict = field(default_factory=dict)
-
 
     def _calculate_train_pca(self) -> np.array:
         """Return the PCA first component transformation on the traind data"""
@@ -188,8 +188,9 @@ class GBSCV(SCV):
         start_time = time.time()
         self._make_folders(["folds", name_folds])
         self.data[X_1DIM_COL] = self._calculate_train_pca()
-        for fold_name, test_data in tqdm(self.data.groupby(by=self.fold_col),
-                                         desc="Creating folds:"):
+        for fold_name, test_data in tqdm(
+            self.data.groupby(by=self.fold_col), desc="Creating folds:"
+        ):
             # Cread fold folder
             self._mkdir(str(fold_name))
             # Initialize x , y and reduce
@@ -201,9 +202,7 @@ class GBSCV(SCV):
             # Calculate selection buffer
             if run_selection:
                 selection_buffer = self._calculate_buffer(
-                    X_1DIM_COL,
-                    self._sill_reduced,
-                    kappa=20
+                    X_1DIM_COL, self._sill_reduced, kappa=20
                 )
                 selection_buffer = list(set(selection_buffer))
                 self._train_data = self._train_data.loc[selection_buffer]
@@ -211,9 +210,7 @@ class GBSCV(SCV):
             # and the gamma calculation will be influenced by the selection buffer.
             # Calculate removing buffer
             removing_buffer = self._calculate_buffer(
-                self.target_col,
-                self._sill_target,
-                kappa=kappa
+                self.target_col, self._sill_target, kappa=kappa
             )
             removing_buffer = list(set(removing_buffer))
             self._train_data.drop(index=removing_buffer, inplace=True)

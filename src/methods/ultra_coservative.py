@@ -1,4 +1,4 @@
-"""Generate raw data for census"""
+"""Generate ultra-conservative spatial folds"""
 import os
 import time
 from dataclasses import dataclass, field
@@ -7,22 +7,36 @@ import numpy as np
 from tqdm import tqdm
 from src.scv import SCV
 
+
 @dataclass
 class ULTRACONSERVATIVE(SCV):
-    """Represents the Graph-Based Spatial Cross Validation.
+    """Represents the Ultra-Conservative Spatial Cross-Validation.
 
     Attributes
     ----------
+        data: pd.Dataframe
+            The spatial dataset to generate the folds
+        fold_col: str
+            The fold column name
+        target_col: str
+            The targer attribute column name
+        adj_matrix: pd.Dataframe
+            The adjacency matrix regarding the spatial objects in the data
+        root_path : str
+            Root path
 
     """
+
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     _sill_target: np.float64 = None
 
     def _calculate_sill(self):
+        # Calculates sill, variance of the target variable
         self._sill_target = self.data[self.target_col].var()
 
     def _get_lag_neighbors(self, indexes, lag):
+        # Return neighbors at a given lag neighborhood
         for _ in range(lag):
             area_matrix = self.adj_matrix.loc[indexes]
             neighbors = area_matrix.sum(axis=0) > 0
@@ -32,6 +46,7 @@ class ULTRACONSERVATIVE(SCV):
         return neighbors_index
 
     def _calculate_buffer_size(self):
+        # Calculate the size of the removing buffer
         lag = 0
         gamma = -np.inf
         self._calculate_sill()
@@ -52,6 +67,7 @@ class ULTRACONSERVATIVE(SCV):
         return lag
 
     def _convert_adj_matrix_index_types(self):
+        # Convert adjacency matrix index types
         self.adj_matrix.index = self.adj_matrix.index.astype(self.data.index.dtype)
         self.adj_matrix.columns = self.adj_matrix.columns.astype(self.data.index.dtype)
 
@@ -71,13 +87,15 @@ class ULTRACONSERVATIVE(SCV):
             if idx in self.data.index and idx not in self._test_data.index
         ]
 
-    def create_folds(self, run_selection=None, name_folds="ultra_conservative_folds", kappa=None) -> None:
+    def create_folds(
+        self, run_selection=None, name_folds="ultra_conservative", kappa=None
+    ) -> None:
         """Generate ultra-conservartive spatial folds"""
         # Create folder folds
         start_time = time.time()
         self._make_folders(["folds", name_folds])
         self._convert_adj_matrix_index_types()
-        #buffer_size = self._calculate_buffer_size()
+        # buffer_size = self._calculate_buffer_size()
         buffer_size = 27
         for fold_name, test_data in tqdm(self.data.groupby(by=self.fold_col)):
             # Cread fold folder
@@ -94,7 +112,6 @@ class ULTRACONSERVATIVE(SCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self.cur_dir = os.path.join(
-                self._get_root_path(), "folds", name_folds)
+            self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         end_time = time.time()
         print(f"Execution time: {end_time-start_time} seconds")

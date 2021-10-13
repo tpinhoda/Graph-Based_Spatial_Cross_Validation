@@ -1,12 +1,12 @@
 """Main script"""
 import os
 from pathlib import Path
+import rich
+import pandas as pd
+from src import utils
 from src.methods.optimistic import OPTMISTIC
 from src.methods.ultra_coservative import ULTRACONSERVATIVE
 from src.methods.gbscv import GBSCV
-import pandas as pd
-from src import utils
-import rich
 
 rich.traceback.install()
 
@@ -37,27 +37,27 @@ def main():
     # Set index cols
     adj_matrix.set_index(adj_matrix.columns[0], inplace=True)
     # Creates and run the meshblock processing pipeline
-    #gbscv = GBSCV(
+    # gbscv = GBSCV(
     #    data=data,
     #    fold_col=index_folds,
     #    target_col=target,
     #    adj_matrix=adj_matrix,
     #    root_path=env_var["root_path"],
-    #)
-    #gbscv.create_folds(
+    # )
+    # gbscv.create_folds(
     #    run_selection=True,
     #    name_folds="selection_removing_buffer_folds",
     #    kappa=20,
-    #)
-    
-    #optmistic = OPTMISTIC(
+    # )
+
+    # optmistic = OPTMISTIC(
     #    data=data,
     #    fold_col=index_folds,
     #    root_path=env_var["root_path"],
-    #)
-    #optmistic.create_folds(
+    # )
+    # optmistic.create_folds(
     #    name_folds="optmistic_folds",
-    #)
+    # )
     conservative = ULTRACONSERVATIVE(
         data=data,
         fold_col=index_folds,
@@ -68,7 +68,7 @@ def main():
     conservative.create_folds(
         name_folds="ultra_conservative_folds",
     )
-    
+
 
 if __name__ == "__main__":
     main()
