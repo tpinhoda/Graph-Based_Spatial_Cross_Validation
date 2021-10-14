@@ -3,7 +3,7 @@ import os
 import time
 from dataclasses import dataclass
 from tqdm import tqdm
-from src.scv import SCV
+from src.scv.scv import SCV
 
 
 @dataclass

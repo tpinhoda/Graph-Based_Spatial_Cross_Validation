@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from tqdm import tqdm
-from src.scv import SCV
+from src.scv.scv import SCV
 
 
 X_1DIM_COL = "X_1DIM"
@@ -26,12 +26,15 @@ class GBSCV(SCV):
             The targer attribute column name
         adj_matrix: pd.Dataframe
             The adjacency matrix regarding the spatial objects in the data
+        paper: bool
+            Whether to run experiments according to ICMLA21 paper
         root_path : str
             Root path
     """
 
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
+    paper: bool = False
     _sill_target: Dict = field(default_factory=dict)
     _sill_reduced: Dict = field(default_factory=dict)
 
@@ -39,6 +42,10 @@ class GBSCV(SCV):
         """Return the PCA first component transformation on the traind data"""
         pca = PCA(n_components=1)
         train = self.data.drop(columns=[self.fold_col, self.target_col])
+        # For the IMCLA21 paper the PCA is executed only on the cennsus columns
+        if self.paper:
+            cols = [c for c in train.columns if "CENSUS" in c]
+            train = train[cols]
         pca.fit(train)
         return pca.transform(train).flatten()
 
