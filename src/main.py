@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 from src import utils
 from src.pipeline import Pipeline
+from src.visualization.performance import VizMetrics
 
 SWITCHERS = {
     "scv": True,
@@ -11,7 +12,6 @@ SWITCHERS = {
     "train": True,
     "predict": True,
     "evaluate": True,
-    "visualization": False,
 }
 
 
@@ -29,12 +29,12 @@ def main():
     # Load data
     path = os.path.join(env_var["root_path"], "data.csv")
     data = pd.read_csv(path, index_col=index, low_memory=False)
-
+    # Load adjacency matrix
     adj_matrix = pd.read_csv(
         os.path.join(env_var["root_path"], "queen_matrix.csv"), low_memory=False
     )
-    # Set index cols
     adj_matrix.set_index(adj_matrix.columns[0], inplace=True)
+    # Instanciate pipeline
     pipeline = Pipeline(
         root_path=env_var["root_path"],
         data=data,
@@ -50,7 +50,16 @@ def main():
         paper=True,
         switchers=SWITCHERS,
     )
-    pipeline.run()
+    viz = VizMetrics(
+        root_path=env_var["root_path"],
+        cv_methods=["Optimistic", "RBuffer", "SRBuffer", "UltraConservative"],
+        index_col="FOLD",
+        fs_method="CFS",
+        ml_method="LGBM",
+    )
+
+    # pipeline.run()
+    viz.run()
 
 
 if __name__ == "__main__":

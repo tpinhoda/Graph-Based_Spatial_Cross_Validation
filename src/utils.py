@@ -17,6 +17,7 @@ def initialize_logging():
     """Initialize the format of the logger messages"""
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
+    logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
 
 
 def initialize_rich_tracerback():

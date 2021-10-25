@@ -1,9 +1,0 @@
-{
-    "index_col": "INDEX",
-    "fold_col": "FOLD_INDEX",
-    "target_col": "TARGET",
-    "scv_method": "GraphBasedSCV",
-    "paper": 1,
-    "fs_method": "CFS",
-    "ml_model": "LGBM"
-}

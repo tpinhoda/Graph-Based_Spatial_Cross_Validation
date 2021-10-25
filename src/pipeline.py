@@ -10,7 +10,6 @@ from src.feature_selection.fs import FeatureSelection
 from src.model.train import Train
 from src.model.predict import Predict
 from src.model.evaluate import Evaluate
-from src.visualization.viz import Visualization
 
 PIPELINE_MAP: Final = {
     "scv": {
@@ -23,7 +22,6 @@ PIPELINE_MAP: Final = {
     "train": Train,
     "predict": Predict,
     "evaluate": Evaluate,
-    "visualization": Visualization,
 }
 
 
@@ -35,10 +33,30 @@ class Pipeline:
 
     Attributes
     ----------
-    data_name: str
-        Describes the type of data [location or results]
-    params: Dict[str, str]
-        Dictionary of parameters
+    root_path : str
+        Root path
+    data: pd.Dataframe
+        The spatial dataset to generate the folds
+    adj_matrix: pd.Dataframe
+        The adjacency matrix regarding the spatial objects in the data
+    index_col: str
+        The dataset´s index column name
+    fold_col: str
+        The dataset´s folds column name
+    target_col: str
+        The target column name
+    scv_method: str
+        The spatial cross-validation method
+    run_selection: bool
+        Whether to run or not the selection step
+    kappa: float
+        Graph-Based SCV kappa paramenter
+    fs_method: str
+        The feature selection method
+    ml_method: str
+        The machine learning method
+    paper: bool
+        Whether to run the spatial-cross validation according to the ICMLA21 paper
     switchers: Dict[str, int]
         Dictionary of switchers to generate the pipeline
     """
@@ -118,7 +136,6 @@ class Pipeline:
             "train": self._init_class,
             "predict": self._init_class,
             "evaluate": self._init_class,
-            "vizualization": self._init_class,
         }
         return processes[process](process)
 

@@ -31,19 +31,23 @@ class Data(ABC):
     _logger_name: str = None
 
     def logger_info(self, message: str):
-        """Print longger info message"""
+        """Print logger info message"""
         logger = logging.getLogger(self._logger_name)
         logger.info(message)
 
     def logger_warning(self, message: str):
-        """Print longger info message"""
+        """Print logger info message"""
         logger = logging.getLogger(self._logger_name)
         logger.warning(message)
 
     def logger_error(self, message: str):
-        """Print longger info message"""
+        """Print logger info message"""
         logger = logging.getLogger(self._logger_name)
         logger.error(message)
+
+    def set_logger_to_crit(self, module):
+        """Set module logger to critical"""
+        logging.getLogger(module).setLevel(logging.CRITICAL)
 
     def _mkdir(self, folder_name: str) -> None:
         """Creates a folder at current path"""
