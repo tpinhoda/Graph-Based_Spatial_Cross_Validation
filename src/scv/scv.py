@@ -9,7 +9,7 @@ from src.data import Data
 
 
 @dataclass
-class SCV(Data, ABC):
+class SpatialCV(Data, ABC):
     """Represents the Spatial Cross Validation.
 
      Attributes
@@ -44,9 +44,9 @@ class SCV(Data, ABC):
     def _save_data(self):
         """Save the train and test set using feather"""
         self._train_data.reset_index(inplace=True)
-        self._train_data.to_feather(os.path.join(self.cur_dir, "train.ftr"))
+        self._train_data.to_feather(os.path.join(self._cur_dir, "train.ftr"))
         self._test_data.reset_index(inplace=True)
-        self._test_data.to_feather(os.path.join(self.cur_dir, "test.ftr"))
+        self._test_data.to_feather(os.path.join(self._cur_dir, "test.ftr"))
 
     def _save_buffered_indexes(self, removing_buffer):
         """Save the indexes of the buffers"""
@@ -63,10 +63,10 @@ class SCV(Data, ABC):
             "removing_buffer": removing_buffer,
             "discarded": discarded_idx,
         }
-        path_to_save = os.path.join(self.cur_dir, "split_data.json")
+        path_to_save = os.path.join(self._cur_dir, "split_data.json")
         with open(path_to_save, "w", encoding="utf-8") as file:
             json.dump(split_data, file, indent=4)
 
     @abstractmethod
-    def create_folds(self, run_selection=True, name_folds="gbscv", kappa=20):
+    def run(self):
         """Generate graph-based spatial folds"""

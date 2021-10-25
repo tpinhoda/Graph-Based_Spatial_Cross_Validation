@@ -36,7 +36,7 @@ def load_env_variables(project_dir) -> Dict[str, str]:
     }
 
 
-def load_json(params_path):
+def load_json(json_path):
     """Load json file."""
-    with open(params_path, encoding="utf-8") as file:
+    with open(json_path, encoding="utf-8") as file:
         return json.load(file)

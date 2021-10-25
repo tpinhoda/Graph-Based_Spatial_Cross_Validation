@@ -3,12 +3,14 @@ import os
 import time
 from dataclasses import dataclass
 from tqdm import tqdm
-from src.scv.scv import SCV
+from src.scv.scv import SpatialCV
+
+OPTIMISTIC = "Optimistic"
 
 
 @dataclass
-class OPTMISTIC(SCV):
-    """Represents the Optmistic Spatial Cross-Validation, without considering
+class Optimistic(SpatialCV):
+    """Represents the Optimistic Spatial Cross-Validation, without considering
     the removing buffer.
 
      Attributes
@@ -21,14 +23,15 @@ class OPTMISTIC(SCV):
             Root path
     """
 
-    def create_folds(
-        self, run_selection=None, name_folds="optmistic", kappa=None
-    ) -> None:
+    def run(self) -> None:
         """Generate merged data"""
         # Create folder folds
         start_time = time.time()
-        self._make_folders([name_folds])
-        for fold_name, test_data in tqdm(self.data.groupby(by=self.fold_col)):
+        name_folds = OPTIMISTIC
+        self._make_folders(["folds", name_folds])
+        for fold_name, test_data in tqdm(
+            self.data.groupby(by=self.fold_col), desc="Creating folds"
+        ):
             # Cread fold folder
             self._mkdir(str(fold_name))
             # Initialize x , y and reduce
@@ -40,6 +43,6 @@ class OPTMISTIC(SCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self.cur_dir = os.path.join(self._get_root_path(), name_folds)
+            self._cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         end_time = time.time()
         print(f"Execution time: {end_time-start_time} seconds")

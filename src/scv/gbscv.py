@@ -7,14 +7,16 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from tqdm import tqdm
-from src.scv.scv import SCV
+from src.scv.scv import SpatialCV
 
 
 X_1DIM_COL = "X_1DIM"
+SRBUFFER = "SRBuffer"
+RBUFFER = "RBuffer"
 
 
 @dataclass
-class GBSCV(SCV):
+class GraphBasedSCV(SpatialCV):
     """Generates the Graph Based Spatial Cross-Validation folds
     Attributes
     ----------
@@ -32,6 +34,8 @@ class GBSCV(SCV):
             Root path
     """
 
+    kappa: int = 20
+    run_selection: bool = False
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     paper: bool = False
@@ -184,19 +188,15 @@ class GBSCV(SCV):
             count_n += 1
         return buffer
 
-    def create_folds(
-        self,
-        run_selection=True,
-        name_folds="gbscv",
-        kappa=20,
-    ):
+    def run(self):
         """Generate graph-based spatial folds"""
         # Create folder folds
         start_time = time.time()
+        name_folds = SRBUFFER if self.run_selection else RBUFFER
         self._make_folders(["folds", name_folds])
         self.data[X_1DIM_COL] = self._calculate_train_pca()
         for fold_name, test_data in tqdm(
-            self.data.groupby(by=self.fold_col), desc="Creating folds:"
+            self.data.groupby(by=self.fold_col), desc="Creating folds"
         ):
             # Cread fold folder
             self._mkdir(str(fold_name))
@@ -207,9 +207,9 @@ class GBSCV(SCV):
             # Ensure indexes and columns compatibility
             self._convert_adj_matrix_index_types()
             # Calculate selection buffer
-            if run_selection:
+            if self.run_selection:
                 selection_buffer = self._calculate_buffer(
-                    X_1DIM_COL, self._sill_reduced, kappa=20
+                    X_1DIM_COL, self._sill_reduced, kappa=self.kappa
                 )
                 selection_buffer = list(set(selection_buffer))
                 self._train_data = self._train_data.loc[selection_buffer]
@@ -217,7 +217,7 @@ class GBSCV(SCV):
             # and the gamma calculation will be influenced by the selection buffer.
             # Calculate removing buffer
             removing_buffer = self._calculate_buffer(
-                self.target_col, self._sill_target, kappa=kappa
+                self.target_col, self._sill_target, kappa=self.kappa
             )
             removing_buffer = list(set(removing_buffer))
             self._train_data.drop(index=removing_buffer, inplace=True)
@@ -228,6 +228,6 @@ class GBSCV(SCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
+            self._cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         end_time = time.time()
         print(f"Execution time: {end_time-start_time} seconds")

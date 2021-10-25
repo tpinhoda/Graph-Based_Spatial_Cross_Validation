@@ -1,11 +1,9 @@
 {
-    "region": "Brazil",
-    "data_name": "elections",
-    "aggregation_level": "city",
-    "save_filename": "Census_2010_NoGlobal_X_Election_2018_2t_President.csv",
-    "type_merge": "spatial",
-    "left_id_col": "[GEO]_ID_CITY",
-    "right_id_col": "[GEO]_ID_IBGE_CITY",
-    "meshblock_id_col": "code_muni",
-    "meshblock_crs": 4674
+    "index_col": "INDEX",
+    "fold_col": "FOLD_INDEX",
+    "target_col": "TARGET",
+    "scv_method": "GraphBasedSCV",
+    "paper": 1,
+    "fs_method": "CFS",
+    "ml_model": "LGBM"
 }
