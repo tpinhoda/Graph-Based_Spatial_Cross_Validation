@@ -24,6 +24,8 @@ class UltraConservative(SpatialCV):
             The targer attribute column name
         adj_matrix: pd.Dataframe
             The adjacency matrix regarding the spatial objects in the data
+        fast: bool
+            Whether to skip the semivariogram process and run with the ICMLA21 paper results
         root_path : str
             Root path
 
@@ -31,6 +33,7 @@ class UltraConservative(SpatialCV):
 
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
+    fast: bool = False
     _sill_target: np.float64 = None
 
     def _calculate_sill(self):
@@ -96,8 +99,7 @@ class UltraConservative(SpatialCV):
         name_folds = ULTRACONSERVATIVE
         self._make_folders(["folds", name_folds])
         self._convert_adj_matrix_index_types()
-        # buffer_size = self._calculate_buffer_size()
-        buffer_size = 27
+        buffer_size = 27 if self.fast else self._calculate_buffer_size()
         for fold_name, test_data in tqdm(
             self.data.groupby(by=self.fold_col), desc="Creating folds"
         ):
