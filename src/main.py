@@ -25,11 +25,9 @@ def main():
     project_dir = str(Path(__file__).resolve().parents[1])
     # Load enviromental variables
     env_var = utils.load_env_variables(project_dir)
-    # Set parameters
-    index = "INDEX"
     # Load data
     path = os.path.join(env_var["root_path"], "data.csv")
-    data = pd.read_csv(path, index_col=index, low_memory=False)
+    data = pd.read_csv(path, index_col="INDEX", low_memory=False)
     # Load adjacency matrix
     adj_matrix = pd.read_csv(
         os.path.join(env_var["root_path"], "queen_matrix.csv"), low_memory=False
@@ -40,7 +38,7 @@ def main():
         root_path=env_var["root_path"],
         data=data,
         adj_matrix=adj_matrix,
-        index_col=index,
+        index_col="INDEX",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
         scv_method="RBuffer",
@@ -51,17 +49,18 @@ def main():
         paper=True,
         switchers=SWITCHERS,
     )
+
     viz_metrics = VizMetrics(
         root_path=env_var["root_path"],
-        cv_methods=["Optimistic", "RBuffer", "SRBuffer", "UltraConservative"],
+        cv_methods=["UltraConservative", "SRBuffer", "RBuffer", "Optimistic"],
         index_col="FOLD",
         fs_method="CFS",
         ml_method="LGBM",
     )
 
-    viz = VizDependence(
+    viz_dependence = VizDependence(
         root_path=env_var["root_path"],
-        cv_methods=["UltraConservative", "RBuffer", "SRBuffer", "Optimistic"],
+        cv_methods=["UltraConservative", "SRBuffer", "RBuffer", "Optimistic"],
         index_col="INDEX",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
@@ -71,8 +70,9 @@ def main():
         paper=True,
     )
 
-    # pipeline.run()
-    viz.run()
+    pipeline.run()
+    viz_metrics.run()
+    viz_dependence.run()
 
 
 if __name__ == "__main__":
