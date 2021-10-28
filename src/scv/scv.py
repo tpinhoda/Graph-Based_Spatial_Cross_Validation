@@ -41,6 +41,12 @@ class SpatialCV(Data, ABC):
         self._train_data.drop(columns=cols_drop, inplace=True)
         self._test_data.drop(columns=cols_drop, inplace=True)
 
+    def _save_fold_by_index_training(self):
+        """Save the fold index relation table"""
+        self._train_data[self.fold_col].to_csv(
+            os.path.join(self._cur_dir, "fold_by_idx.csv")
+        )
+
     def _save_data(self):
         """Save the train and test set using feather"""
         self._train_data.reset_index(inplace=True)
@@ -66,6 +72,13 @@ class SpatialCV(Data, ABC):
         path_to_save = os.path.join(self._cur_dir, "split_data.json")
         with open(path_to_save, "w", encoding="utf-8") as file:
             json.dump(split_data, file, indent=4)
+
+    def _save_time(self, end, start):
+        time = end - start
+        filepath = os.path.join(self._cur_dir, "execution_time.txt")
+        with open(filepath, "w") as file:
+            msg = f"Execution time \n seconds: {time} \n minutes: {time/60} \n hours: {time/3600}"
+            file.write(msg)
 
     @abstractmethod
     def run(self):

@@ -45,6 +45,7 @@ class Evaluate(Data):
     _predictions: pd.DataFrame = field(default_factory=pd.DataFrame)
     _train: pd.DataFrame = field(default_factory=pd.DataFrame)
     _test: pd.DataFrame = field(default_factory=pd.DataFrame)
+    _fold_idx: pd.DataFrame = field(default_factory=pd.DataFrame)
     _selected_features: Dict = field(default_factory=dict)
     _metrics: Dict = field(default_factory=dict)
 
@@ -53,18 +54,29 @@ class Evaluate(Data):
         self._predictions = pd.read_csv(data_path, index_col=self.index_col)
 
     def _read_train(self, data_path):
+        """Read the train data"""
         self._train = pd.read_feather(os.path.join(data_path, "train.ftr"))
 
     def _read_test(self, data_path):
+        """Read the test data"""
         self._test = pd.read_feather(os.path.join(data_path, "test.ftr"))
 
+    def _read_fold_idx_table(self, data_path):
+        """Read the fold_by_idx data"""
+        self._fold_idx = pd.read_csv(
+            os.path.join(data_path, "fold_by_idx.csv"), index_col=self.index_col
+        )
+
     def _read_fs(self, data_path):
+        """Read selected features json file"""
         self._selected_features = utils.load_json(data_path)
 
     def _initialize_data(self, folds_path, pred_path, fs_path, fold):
+        """Load all data"""
         self._read_predictions(os.path.join(pred_path, f"{fold}.csv"))
         self._read_train(os.path.join(folds_path, fold))
         self._read_test(os.path.join(folds_path, fold))
+        self._read_fold_idx_table(os.path.join(folds_path, fold))
         self._read_fs(os.path.join(fs_path, f"{fold}.json"))
         self._metrics = METRICS
 
@@ -72,8 +84,8 @@ class Evaluate(Data):
         self._metrics["FOLD"].append(fold)
 
     def _get_train_n_folds(self):
-        self._train["fold"] = self._train[self.index_col].astype(str).str[:2]
-        self._metrics["TRAIN_N_FOLDS"].append(self._train["fold"].nunique())
+        fold_col = self._fold_idx.columns[0]
+        self._metrics["TRAIN_N_FOLDS"].append(self._fold_idx[fold_col].nunique())
 
     def _get_train_size(self):
         self._metrics["TRAIN_SIZE"].append(self._train.shape[0])

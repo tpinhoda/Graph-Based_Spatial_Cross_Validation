@@ -96,8 +96,8 @@ class UltraConservative(SpatialCV):
         name_folds = ULTRACONSERVATIVE
         self._make_folders(["folds", name_folds])
         self._convert_adj_matrix_index_types()
-        buffer_size = self._calculate_buffer_size()
-        # buffer_size = 27
+        # buffer_size = self._calculate_buffer_size()
+        buffer_size = 27
         for fold_name, test_data in tqdm(
             self.data.groupby(by=self.fold_col), desc="Creating folds"
         ):
@@ -110,11 +110,15 @@ class UltraConservative(SpatialCV):
             self._train_data.drop(index=removing_buffer, inplace=True)
             # Save buffered data indexes
             self._save_buffered_indexes(removing_buffer)
+            # Save fold index relation table
+            self._save_fold_by_index_training()
             # Clean data
             self._clean_data(cols_drop=[self.fold_col])
             # Save data
             self._save_data()
             # Update cur dir
             self._cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
+        # Save execution time
         end_time = time.time()
+        self._save_time(end_time, start_time)
         print(f"Execution time: {end_time-start_time} seconds")

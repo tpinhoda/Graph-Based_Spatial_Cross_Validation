@@ -5,12 +5,13 @@ import pandas as pd
 from src import utils
 from src.pipeline import Pipeline
 from src.visualization.performance import VizMetrics
+from src.visualization.dependence import VizDependence
 
 SWITCHERS = {
-    "scv": True,
-    "fs": True,
-    "train": True,
-    "predict": True,
+    "scv": False,
+    "fs": False,
+    "train": False,
+    "predict": False,
     "evaluate": True,
 }
 
@@ -42,7 +43,7 @@ def main():
         index_col=index,
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
-        scv_method="UltraConservative",
+        scv_method="RBuffer",
         run_selection=False,
         kappa=20,
         fs_method="CFS",
@@ -50,12 +51,24 @@ def main():
         paper=True,
         switchers=SWITCHERS,
     )
-    viz = VizMetrics(
+    viz_metrics = VizMetrics(
         root_path=env_var["root_path"],
         cv_methods=["Optimistic", "RBuffer", "SRBuffer", "UltraConservative"],
         index_col="FOLD",
         fs_method="CFS",
         ml_method="LGBM",
+    )
+
+    viz = VizDependence(
+        root_path=env_var["root_path"],
+        cv_methods=["UltraConservative", "RBuffer", "SRBuffer", "Optimistic"],
+        index_col="INDEX",
+        fold_col="INDEX_FOLDS",
+        target_col="TARGET",
+        adj_matrix=adj_matrix,
+        prob=0.95,
+        fold_list=data["INDEX_FOLDS"].unique(),
+        paper=True,
     )
 
     # pipeline.run()

@@ -11,8 +11,6 @@ from tqdm import tqdm
 from src.data import Data
 
 
-
-
 @dataclass
 class VizMetrics(Data):
     """Generates plots to visualize models performance.
@@ -129,4 +127,3 @@ class VizMetrics(Data):
         self.load_cv_results()
         self.generate_mean_table()
         self.generate_metric_plot()
-        
