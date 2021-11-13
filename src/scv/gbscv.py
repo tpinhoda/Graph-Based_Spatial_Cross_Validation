@@ -39,9 +39,13 @@ class GraphBasedSCV(SpatialCV):
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     paper: bool = False
-    _sill_target: Dict = field(default_factory=dict)
-    _sill_reduced: Dict = field(default_factory=dict)
-
+    sill_target: Dict = field(default_factory=dict)
+    sill_reduced: Dict = field(default_factory=dict)
+    
+    def _init_fields(self):
+        self.sill_target = {}
+        self.sill_reduced = {}
+        
     def _calculate_train_pca(self) -> np.array:
         """Return the PCA first component transformation on the traind data"""
         pca = PCA(n_components=1)
@@ -56,27 +60,27 @@ class GraphBasedSCV(SpatialCV):
     def _calculate_removing_buffer_sill(self, fold_name, fold_data, global_var) -> Dict:
         """Calculate the sill for each fold to be used on the removing buffer process"""
         fold_target = fold_data[self.target_col]
-        test_target = self._test_data[self.target_col]
+        test_target = self.test_data[self.target_col]
         target_var = fold_target.append(test_target).var()
-        self._sill_target[fold_name] = (target_var + global_var) / 2
+        self.sill_target[fold_name] = (target_var + global_var) / 2
 
     def _calculate_selection_buffer_sill(
         self, fold_name, fold_data, global_var
     ) -> Dict:
         """Calculate the sill for each fold to be used on the selection buffer process"""
-        reduced_var = fold_data[X_1DIM_COL].append(self._test_data[X_1DIM_COL]).var()
-        self._sill_reduced[fold_name] = (reduced_var + global_var) / 2
-        max_var_train = max(self._sill_reduced, key=self._sill_reduced.get)
-        for _ in self._sill_reduced:
-            self._sill_reduced[_] = self._sill_reduced[max_var_train]
+        reduced_var = fold_data[X_1DIM_COL].append(self.test_data[X_1DIM_COL]).var()
+        self.sill_reduced[fold_name] = (reduced_var + global_var) / 2
+        max_var_train = max(self.sill_reduced, key=self.sill_reduced.get)
+        for _ in self.sill_reduced:
+            self.sill_reduced[_] = self.sill_reduced[max_var_train]
 
     def _initiate_buffers_sills(self) -> Dict:
         """Initialize and calculate the sills for the removing and selectiont procedures"""
         global_target_var = self.data[self.target_col].var()
         global_reduced_var = self.data[X_1DIM_COL].var()
-        self._sill_target = {}
-        self._sill_reduced = {}
-        for fold_name, fold_data in self._train_data.groupby(by=self.fold_col):
+        self.sill_target = {}
+        self.sill_reduced = {}
+        for fold_name, fold_data in self.train_data.groupby(by=self.fold_col):
             self._calculate_selection_buffer_sill(
                 fold_name, fold_data, global_reduced_var
             )
@@ -100,10 +104,10 @@ class GraphBasedSCV(SpatialCV):
 
     def _calculate_longest_path(self) -> int:
         """Calculate the longest_path from a BFS tree taking the test set as root"""
-        path_indexes = self._test_data.index.values.tolist()
+        path_indexes = self.test_data.index.values.tolist()
         local_data_idx = (
-            self._test_data.index.values.tolist()
-            + self._train_data.index.values.tolist()
+            self.test_data.index.values.tolist()
+            + self.train_data.index.values.tolist()
         )
         matrix = self.adj_matrix.loc[local_data_idx, local_data_idx]
         neighbors = self._get_neighbors(path_indexes, matrix)
@@ -117,7 +121,7 @@ class GraphBasedSCV(SpatialCV):
     def _calculate_similarity_matrix(self, fold_data, attribute) -> np.ndarray:
         """Calculate the similarity matrix between test set and a given training
         fold set based on a given attribute"""
-        test_values = self._test_data[attribute].to_numpy()
+        test_values = self.test_data[attribute].to_numpy()
         fold_values = fold_data[attribute].to_numpy()
         return np.subtract.outer(test_values, fold_values) ** 2
 
@@ -132,8 +136,8 @@ class GraphBasedSCV(SpatialCV):
     def _calculate_gamma_by_fold(self, neighbors, attribute) -> Dict:
         """Calculate the semivariogram by folds"""
         context_gamma = {}
-        neighbors = [n for n in neighbors if n in self._train_data.index]
-        neighbors_data = self._train_data.loc[neighbors]
+        neighbors = [n for n in neighbors if n in self.train_data.index]
+        neighbors_data = self.train_data.loc[neighbors]
         for fold, fold_data in neighbors_data.groupby(by=self.fold_col):
             similarity = self._calculate_similarity_matrix(fold_data, attribute)
             gamma = self._calculate_gamma(similarity)
@@ -145,7 +149,8 @@ class GraphBasedSCV(SpatialCV):
 
     def _get_n_fold_neighbohood(self) -> int:
         """Get ne number of folds neighbors from the test set"""
-        neighbors_idx = self._get_neighbors(self._test_data.index, self.adj_matrix)
+        neighbors_idx = self._get_neighbors(self.test_data.index, self.adj_matrix)
+        neighbors_idx = [n for n in neighbors_idx if n in self.data.index]
         return len(self.data.loc[neighbors_idx].groupby(self.fold_col))
 
     @staticmethod
@@ -169,7 +174,7 @@ class GraphBasedSCV(SpatialCV):
             # Set growing to 0
             growing = 0
             # Get the instance indexes from te test set + the indexes buffer
-            growing_graph_idx = self._test_data.index.values.tolist() + buffer
+            growing_graph_idx = self.test_data.index.values.tolist() + buffer
             # Get the neighbor
             neighbors = self._get_neighbors(growing_graph_idx, self.adj_matrix)
             # Calculate the semivariogram for each fold in the neighborhood
@@ -193,6 +198,7 @@ class GraphBasedSCV(SpatialCV):
         # Create folder folds
         start_time = time.time()
         name_folds = SRBUFFER if self.run_selection else RBUFFER
+        self._init_fields()
         self._make_folders(["folds", name_folds])
         self.data[X_1DIM_COL] = self._calculate_train_pca()
         for fold_name, test_data in tqdm(
@@ -209,18 +215,18 @@ class GraphBasedSCV(SpatialCV):
             # Calculate selection buffer
             if self.run_selection:
                 selection_buffer = self._calculate_buffer(
-                    X_1DIM_COL, self._sill_reduced, kappa=self.kappa
+                    X_1DIM_COL, self.sill_reduced, kappa=self.kappa
                 )
                 selection_buffer = list(set(selection_buffer))
-                self._train_data = self._train_data.loc[selection_buffer]
+                self.train_data = self.train_data.loc[selection_buffer]
             # The train data is used to calcualte the buffer. Thus, the size tree,
             # and the gamma calculation will be influenced by the selection buffer.
             # Calculate removing buffer
             removing_buffer = self._calculate_buffer(
-                self.target_col, self._sill_target, kappa=self.kappa
+                self.target_col, self.sill_target, kappa=self.kappa
             )
             removing_buffer = list(set(removing_buffer))
-            self._train_data.drop(index=removing_buffer, inplace=True)
+            self.train_data.drop(index=removing_buffer, inplace=True)
             # Save buffered data indexes
             self._save_buffered_indexes(removing_buffer)
             # Save fold index relation table
@@ -230,7 +236,7 @@ class GraphBasedSCV(SpatialCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self._cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
+            self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         # Save execution time
         end_time = time.time()
         self._save_time(end_time, start_time)

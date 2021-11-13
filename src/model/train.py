@@ -1,5 +1,6 @@
 """Training data process"""
 import os
+import re
 from dataclasses import dataclass, field
 import pickle
 import lightgbm
@@ -36,18 +37,18 @@ class Train(Data):
     scv_method: str = "gbscv"
     index_col: str = "INDEX"
     target_col: str = "TARGET"
-    _train_data: pd.DataFrame = field(default_factory=pd.DataFrame)
+    train_data: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     def _read_train_data(self, data_path):
         """Read the training data"""
-        self._train_data = pd.read_feather(os.path.join(data_path, "train.ftr"))
-        self._train_data.set_index(self.index_col, inplace=True)
+        self.train_data = pd.read_feather(os.path.join(data_path, "train.ftr"))
+        self.train_data.set_index(self.index_col, inplace=True)
 
     def _selected_features_filtering(self, json_path):
         """Filter only the features selected"""
         selected_features = utils.load_json(json_path)
         selected_features["selected_features"].append(self.target_col)
-        self._train_data = self._train_data[selected_features["selected_features"]]
+        self.train_data = self.train_data[selected_features["selected_features"]]
 
     def _get_model(self, params):
         """Get the models by name"""
@@ -55,10 +56,15 @@ class Train(Data):
 
     def _split_data(self):
         """Split the data into explanatory and target features"""
-        y_train = self._train_data[self.target_col]
-        x_train = self._train_data.drop(columns=[self.target_col])
+        self._clean_train_data_col()
+        y_train = self.train_data[self.target_col]
+        x_train = self.train_data.drop(columns=[self.target_col])
         return x_train, y_train
-
+    
+    def _clean_train_data_col(self):
+        clean_cols = [re.sub(r'\W+','', col) for col in self.train_data.columns]
+        self.train_data.columns = clean_cols
+        
     def _fit(self, model):
         """Fit the model"""
         x_train, y_train = self._split_data()
@@ -66,7 +72,7 @@ class Train(Data):
 
     def save_model(self, model, fold):
         """Save the model using picke"""
-        pickle.dump(model, open(os.path.join(self._cur_dir, f"{fold}.pkl"), "wb"))
+        pickle.dump(model, open(os.path.join(self.cur_dir, f"{fold}.pkl"), "wb"))
 
     def run(self):
         """Runs the training process per fold"""

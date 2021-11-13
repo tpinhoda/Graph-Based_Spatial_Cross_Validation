@@ -45,7 +45,7 @@ class Optimistic(SpatialCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self._cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
+            self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         # Save execution time
         end_time = time.time()
         self._save_time(end_time, start_time)

@@ -10,17 +10,8 @@ import src.utils as utils
 
 PRED_COL = "PREDICTIONS"
 GROUND_TRUTH_COL = "GROUND_TRUTH"
-METRICS = {
-    "FOLD": [],
-    "TRAIN_N_FOLDS": [],
-    "TRAIN_SIZE": [],
-    "TEST_SIZE": [],
-    "N_FEATURES": [],
-    "RMSE": [],
-}
 
-
-@dataclass
+@dataclass(init=True)
 class Evaluate(Data):
     """Represents the predict data process.
 
@@ -42,34 +33,48 @@ class Evaluate(Data):
     fs_method: str = "CFS"
     scv_method: str = "gbscv"
     index_col: str = "INDEX"
-    _predictions: pd.DataFrame = field(default_factory=pd.DataFrame)
-    _train: pd.DataFrame = field(default_factory=pd.DataFrame)
-    _test: pd.DataFrame = field(default_factory=pd.DataFrame)
-    _fold_idx: pd.DataFrame = field(default_factory=pd.DataFrame)
-    _selected_features: Dict = field(default_factory=dict)
-    _metrics: Dict = field(default_factory=dict)
+    predictions: pd.DataFrame = field(default_factory=pd.DataFrame)
+    train: pd.DataFrame = field(default_factory=pd.DataFrame)
+    test: pd.DataFrame = field(default_factory=pd.DataFrame)
+    fold_idx: pd.DataFrame = field(default_factory=pd.DataFrame)
+    selected_features: Dict = field(default_factory=dict)
+    metrics: Dict = field(default_factory=dict)
+    
+    def _init_fields(self):
+        self.metrics = {} 
 
     def _read_predictions(self, data_path):
         """Read the prediction data"""
-        self._predictions = pd.read_csv(data_path, index_col=self.index_col)
+        self.predictions = pd.read_csv(data_path, index_col=self.index_col)
 
     def _read_train(self, data_path):
         """Read the train data"""
-        self._train = pd.read_feather(os.path.join(data_path, "train.ftr"))
+        self.train = pd.read_feather(os.path.join(data_path, "train.ftr"))
 
     def _read_test(self, data_path):
         """Read the test data"""
-        self._test = pd.read_feather(os.path.join(data_path, "test.ftr"))
+        self.test = pd.read_feather(os.path.join(data_path, "test.ftr"))
 
     def _read_fold_idx_table(self, data_path):
         """Read the fold_by_idx data"""
-        self._fold_idx = pd.read_csv(
+        self.fold_idx = pd.read_csv(
             os.path.join(data_path, "fold_by_idx.csv"), index_col=self.index_col
         )
 
     def _read_fs(self, data_path):
         """Read selected features json file"""
-        self._selected_features = utils.load_json(data_path)
+        self.selected_features = utils.load_json(data_path)
+    
+    @staticmethod
+    def _init_metrics_dict():
+        return {
+            "FOLD": [],
+            "TRAIN_N_FOLDS": [],
+            "TRAIN_SIZE": [],
+            "TEST_SIZE": [],
+            "N_FEATURES": [],
+            "RMSE": [],
+        }
 
     def _initialize_data(self, folds_path, pred_path, fs_path, fold):
         """Load all data"""
@@ -78,33 +83,33 @@ class Evaluate(Data):
         self._read_test(os.path.join(folds_path, fold))
         self._read_fold_idx_table(os.path.join(folds_path, fold))
         self._read_fs(os.path.join(fs_path, f"{fold}.json"))
-        self._metrics = METRICS
+        
 
     def _get_fold_name(self, fold):
-        self._metrics["FOLD"].append(fold)
+        self.metrics["FOLD"].append(fold)
 
     def _get_train_n_folds(self):
-        fold_col = self._fold_idx.columns[0]
-        self._metrics["TRAIN_N_FOLDS"].append(self._fold_idx[fold_col].nunique())
+        fold_col = self.fold_idx.columns[0]
+        self.metrics["TRAIN_N_FOLDS"].append(self.fold_idx[fold_col].nunique())
 
     def _get_train_size(self):
-        self._metrics["TRAIN_SIZE"].append(self._train.shape[0])
+        self.metrics["TRAIN_SIZE"].append(self.train.shape[0])
 
     def _get_test_size(self):
-        self._metrics["TEST_SIZE"].append(self._test.shape[0])
+        self.metrics["TEST_SIZE"].append(self.test.shape[0])
 
     def _get_n_features(self):
-        self._metrics["N_FEATURES"].append(
-            len(self._selected_features["selected_features"])
+        self.metrics["N_FEATURES"].append(
+            len(self.selected_features["selected_features"])
         )
 
     def _get_rmse(self):
-        y_true = self._predictions[GROUND_TRUTH_COL]
-        y_pred = self._predictions[PRED_COL]
+        y_true = self.predictions[GROUND_TRUTH_COL]
+        y_pred = self.predictions[PRED_COL]
         rmse = mean_squared_error(y_true, y_pred, squared=True)
-        self._metrics["RMSE"].append(rmse)
+        self.metrics["RMSE"].append(rmse)
 
-    def _calculate_metrics(self, fold):
+    def _calculatemetrics(self, fold):
         self._get_fold_name(fold)
         self._get_train_n_folds()
         self._get_train_size()
@@ -112,9 +117,9 @@ class Evaluate(Data):
         self._get_n_features()
         self._get_rmse()
 
-    def _save_metrics(self):
-        metrics = pd.DataFrame(self._metrics)
-        metrics.to_csv(os.path.join(self._cur_dir, "metrics.csv"), index=False)
+    def _savemetrics(self):
+        metrics = pd.DataFrame(self.metrics)
+        metrics.to_csv(os.path.join(self.cur_dir, "metrics.csv"), index=False)
 
     def run(self):
         """Runs the predicting process per fold"""
@@ -134,7 +139,8 @@ class Evaluate(Data):
             results_path, "predictions", self.fs_method, self.ml_method
         )
         folds_name = self._get_folders_in_dir(folds_path)
+        self.metrics = self._init_metrics_dict()
         for fold in tqdm(folds_name, desc="Evaluating predictions"):
             self._initialize_data(folds_path, pred_path, fs_path, fold)
-            self._calculate_metrics(fold)
-            self._save_metrics()
+            self._calculatemetrics(fold)
+            self._savemetrics()

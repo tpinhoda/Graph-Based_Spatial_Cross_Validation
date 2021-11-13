@@ -8,10 +8,10 @@ from src.visualization.performance import VizMetrics
 from src.visualization.dependence import VizDependence
 
 SWITCHERS = {
-    "scv": False,
-    "fs": False,
-    "train": False,
-    "predict": False,
+    "scv": True,
+    "fs": True,
+    "train": True,
+    "predict": True,
     "evaluate": True,
 }
 
@@ -41,13 +41,14 @@ def main():
         index_col="INDEX",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
-        scv_method="RBuffer",
+        scv_method="UltraConservative",
         run_selection=False,
         kappa=20,
         fs_method="CFS",
         ml_method="LGBM",
         paper=True,
         switchers=SWITCHERS,
+        fast=False
     )
 
     viz_metrics = VizMetrics(

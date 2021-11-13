@@ -34,11 +34,11 @@ class UltraConservative(SpatialCV):
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     fast: bool = False
-    _sill_target: np.float64 = None
+    sill_target: np.float64 = None
 
     def _calculate_sill(self):
         # Calculates sill, variance of the target variable
-        self._sill_target = self.data[self.target_col].var()
+        self.sill_target = self.data[self.target_col].var()
 
     def _get_lag_neighbors(self, indexes, lag):
         # Return neighbors at a given lag neighborhood
@@ -55,7 +55,7 @@ class UltraConservative(SpatialCV):
         lag = 0
         gamma = -np.inf
         self._calculate_sill()
-        while gamma < self._sill_target:
+        while gamma < self.sill_target:
             lag += 1
             sum_similarity = 0
             total_pairs = 0
@@ -68,7 +68,7 @@ class UltraConservative(SpatialCV):
                 sum_similarity += sum(diffs)
                 total_pairs += len(diffs)
             gamma = sum_similarity / (2 * total_pairs)
-            print(f"sill: {self._sill_target} - lag: {lag} - gamma: {gamma}")
+            print(f"sill: {self.sill_target} - lag: {lag} - gamma: {gamma}")
         return lag
 
     def _convert_adj_matrix_index_types(self):
@@ -77,7 +77,7 @@ class UltraConservative(SpatialCV):
         self.adj_matrix.columns = self.adj_matrix.columns.astype(self.data.index.dtype)
 
     def _calculate_buffer(self, buffer_size):
-        indexes = self._test_data.index.values.tolist()
+        indexes = self.test_data.index.values.tolist()
         for _ in range(buffer_size):
             area_matrix = self.adj_matrix.loc[indexes]
             neighbors = area_matrix.sum(axis=0) > 0
@@ -89,7 +89,7 @@ class UltraConservative(SpatialCV):
         return [
             idx
             for idx in buffer_index
-            if idx in self.data.index and idx not in self._test_data.index
+            if idx in self.data.index and idx not in self.test_data.index
         ]
 
     def run(self) -> None:
@@ -109,7 +109,7 @@ class UltraConservative(SpatialCV):
             self._split_data_test_train(test_data)
             # Calculate removing buffer
             removing_buffer = self._calculate_buffer(buffer_size)
-            self._train_data.drop(index=removing_buffer, inplace=True)
+            self.train_data.drop(index=removing_buffer, inplace=True)
             # Save buffered data indexes
             self._save_buffered_indexes(removing_buffer)
             # Save fold index relation table
@@ -119,7 +119,7 @@ class UltraConservative(SpatialCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self._cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
+            self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         # Save execution time
         end_time = time.time()
         self._save_time(end_time, start_time)

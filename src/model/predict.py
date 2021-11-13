@@ -37,19 +37,19 @@ class Predict(Data):
     scv_method: str = "gbscv"
     index_col: str = "INDEX"
     target_col: str = "TARGET"
-    _test_data: pd.DataFrame = field(default_factory=pd.DataFrame)
-    _predictions: List = field(default_factory=list)
+    test_data: pd.DataFrame = field(default_factory=pd.DataFrame)
+    predictions: List = field(default_factory=list)
 
     def _read_test_data(self, data_path):
         """Read the training data"""
-        self._test_data = pd.read_feather(os.path.join(data_path, "test.ftr"))
-        self._test_data.set_index(self.index_col, inplace=True)
+        self.test_data = pd.read_feather(os.path.join(data_path, "test.ftr"))
+        self.test_data.set_index(self.index_col, inplace=True)
 
     def _selected_features_filtering(self, json_path):
         """Filter only the features selected"""
         selected_features = utils.load_json(json_path)
         selected_features["selected_features"].append(self.target_col)
-        self._test_data = self._test_data[selected_features["selected_features"]]
+        self.test_data = self.test_data[selected_features["selected_features"]]
 
     @staticmethod
     def load_model(filepath):
@@ -58,21 +58,21 @@ class Predict(Data):
 
     def _split_data(self):
         """Split the data into explanatory and target features"""
-        y_test = self._test_data[self.target_col]
-        x_test = self._test_data.drop(columns=[self.target_col])
+        y_test = self.test_data[self.target_col]
+        x_test = self.test_data.drop(columns=[self.target_col])
         return x_test, y_test
 
     def _predict(self, model):
         """make prediction"""
         x_test, _ = self._split_data()
-        self._predictions = model.predict(x_test)
+        self.predictions = model.predict(x_test)
 
     def save_prediction(self, fold):
         """Save the model's prediction"""
-        self._test_data[PRED_COL] = self._predictions
-        self._test_data[GROUND_TRUTH_COL] = self._test_data[self.target_col]
-        pred_to_save = self._test_data[[PRED_COL, GROUND_TRUTH_COL]]
-        pred_to_save.to_csv(os.path.join(self._cur_dir, f"{fold}.csv"))
+        self.test_data[PRED_COL] = self.predictions
+        self.test_data[GROUND_TRUTH_COL] = self.test_data[self.target_col]
+        pred_to_save = self.test_data[[PRED_COL, GROUND_TRUTH_COL]]
+        pred_to_save.to_csv(os.path.join(self.cur_dir, f"{fold}.csv"))
 
     def run(self):
         """Runs the predicting process per fold"""

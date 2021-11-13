@@ -25,7 +25,7 @@ PIPELINE_MAP: Final = {
 }
 
 
-@dataclass
+@dataclass(init=True)
 class Pipeline:
     """Represents a pipeline to evaluate data.
 
@@ -73,8 +73,9 @@ class Pipeline:
     fs_method: str = None
     ml_method: str = None
     paper: bool = False
+    fast: bool = False
     switchers: Dict[str, str] = field(default_factory=dict)
-    __pipeline: List[str] = field(default_factory=list)
+    pipeline: List[str] = field(default_factory=list)
 
     @staticmethod
     def _get_class_attributes(class_process):
@@ -103,6 +104,8 @@ class Pipeline:
             "kappa": self.kappa,
             "fs_method": self.fs_method,
             "ml_method": self.ml_method,
+            "paper": self.paper,
+            "fast": self.fast
         }
         return {attr: params.get(attr) for attr in attributes}
 
@@ -123,6 +126,14 @@ class Pipeline:
             data_class = self._get_init_function(process)
         parameters = self._generate_parameters(data_class())
         return data_class(**parameters)
+    
+    def _init_evaluate(self, process):
+        """Initialize evaluate class"""
+        eval_class = self._get_init_function(process)
+        parameters = self._generate_parameters(eval_class())
+        instanced_eval = eval_class(**parameters)
+        return instanced_eval
+        
 
     def get_pipeline_order(self):
         """Return pipeline order"""
@@ -135,7 +146,7 @@ class Pipeline:
             "fs": self._init_class,
             "train": self._init_class,
             "predict": self._init_class,
-            "evaluate": self._init_class,
+            "evaluate": self._init_evaluate,
         }
         return processes[process](process)
 
@@ -143,10 +154,10 @@ class Pipeline:
         """Generate pipeline to process data"""
         pipeline_order = self.get_pipeline_order()
         for process in pipeline_order:
-            self.__pipeline.append(self.map_pipeline_process(process))
+            self.pipeline.append(self.map_pipeline_process(process))
 
     def run(self):
         """Run pipeline"""
         self.generate_pipeline()
-        for process in self.__pipeline:
+        for process in self.pipeline:
             process.run()

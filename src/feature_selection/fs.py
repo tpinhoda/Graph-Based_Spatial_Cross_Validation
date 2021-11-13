@@ -66,7 +66,7 @@ class FeatureSelection(Data):
         """Save the list of selected features in a json file"""
         json_features = {"selected_features": features}
         with open(
-            os.path.join(self._cur_dir, f"{fold}.json"), "w", encoding="utf-8"
+            os.path.join(self.cur_dir, f"{fold}.json"), "w", encoding="utf-8"
         ) as file:
             json.dump(json_features, file, indent=4)
 

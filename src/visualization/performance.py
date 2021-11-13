@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 import pandas as pd
 import seaborn as sns
+import scikit_posthocs as sp
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import pyplot
 import matplotlib.pylab as plt
@@ -34,12 +35,12 @@ class VizMetrics(Data):
     index_col: str = None
     fs_method: str = None
     ml_method: str = None
-    _cv_methods_path: List = field(default_factory=list)
-    _cv_methods_results: Dict = field(default_factory=dict)
+    cv_methods_path: List = field(default_factory=list)
+    cv_methods_results: Dict = field(default_factory=dict)
 
     def init_methods_path(self):
         """Initialize spatial cv folder paths"""
-        self._cv_methods_path = [
+        self.cv_methods_path = [
             os.path.join(
                 self.root_path,
                 "results",
@@ -54,16 +55,16 @@ class VizMetrics(Data):
 
     def load_cv_results(self):
         """Load metric results from each spatial cv being considered"""
-        for data_path, method in zip(self._cv_methods_path, self.cv_methods):
-            self._cv_methods_results[method] = pd.read_csv(
+        for data_path, method in zip(self.cv_methods_path, self.cv_methods):
+            self.cv_methods_results[method] = pd.read_csv(
                 data_path, index_col=self.index_col
             )
 
     def generate_metric_df(self, metric):
         """Generates a dataframe for a given metric"""
-        index_fold = self._cv_methods_results["Optimistic"].index
+        index_fold = self.cv_methods_results["Optimistic"].index
         metric_df = pd.DataFrame(columns=self.cv_methods, index=index_fold)
-        for cv_method, results in self._cv_methods_results.items():
+        for cv_method, results in self.cv_methods_results.items():
             metric_df[cv_method] = results[metric]
         metric_df.index = metric_df.index.astype(str)
         return metric_df
@@ -78,7 +79,7 @@ class VizMetrics(Data):
         instances = self.generate_metric_df(metric="TRAIN_SIZE")
         metrics = {"rmse": rmse, "features": features, "instances": instances}
 
-        with PdfPages(os.path.join(self._cur_dir, "metrics.pdf")) as pdf_pages:
+        with PdfPages(os.path.join(self.cur_dir, "metrics.pdf")) as pdf_pages:
             for metric_name, metric in tqdm(metrics.items(), desc="Generating plots"):
                 fig, fig_ax = pyplot.subplots(figsize=(20, 5))
                 plt.xticks(rotation=45)
@@ -106,18 +107,28 @@ class VizMetrics(Data):
     def generate_mean_table(self):
         """Generates the mean performance for each spatial cv approache"""
         self.logger_info("Generating mean table.")
-        columns = self._cv_methods_results["Optimistic"].columns.values.tolist()
+        columns = self.cv_methods_results["Optimistic"].columns.values.tolist()
         columns_std = [f"{col}_std" for col in columns]
         columns = columns + columns_std
         columns = columns.sort()
         mean_df = pd.DataFrame(columns=columns, index=self.cv_methods)
-        for metric, results in self._cv_methods_results.items():
+        for method, results in self.cv_methods_results.items():
             describe_df = results.describe()
             for col in results.columns:
                 mean_df.loc[
-                    metric, col
+                    method, col
                 ] = f"{describe_df.loc['mean', col]} ({describe_df.loc['std', col]})"
-        mean_df.T.to_csv(os.path.join(self._cur_dir, "mean_metrics.csv"))
+        mean_df.T.to_csv(os.path.join(self.cur_dir, "mean_metrics.csv"))
+    
+    def tukey_post_hoc_test(self, metric):
+        metric_df = pd.DataFrame(columns=self.cv_methods)
+        for method, results in self.cv_methods_results.items():
+            metric_df[method] = results[metric]
+        metric_df = metric_df.melt(var_name='groups', value_name='values')
+        test = sp.posthoc_tukey(metric_df, val_col='values', group_col='groups')
+        print(test)
+        
+        
 
     def run(self):
         """Runs the visualization step"""
@@ -127,3 +138,4 @@ class VizMetrics(Data):
         self.load_cv_results()
         self.generate_mean_table()
         self.generate_metric_plot()
+        self.tukey_post_hoc_test("RMSE")

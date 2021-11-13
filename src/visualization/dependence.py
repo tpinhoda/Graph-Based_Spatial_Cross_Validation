@@ -43,6 +43,7 @@ class VizDependence(Data):
     _cv_methods_path: List = field(default_factory=list)
     _boundary: pd.DataFrame = field(default_factory=pd.DataFrame)
     _dependence: pd.DataFrame = field(default_factory=pd.DataFrame)
+    _tosee: Dict = field(default_factory=dict)
 
     def _init_methods_path(self):
         """Initialize spatial cv folder paths"""
@@ -117,6 +118,7 @@ class VizDependence(Data):
         indexes = self._split_data["removing_buffer"] + self._split_data["test"]
         neighbors = self._get_neighbors(indexes, self.adj_matrix)
         neighbors = [n for n in neighbors if n not in self._split_data["discarded"]]
+        neighbors = [n for n in neighbors if n in self._fold_idx.index]
         self._boundary = self._fold_idx.loc[neighbors].copy()
 
     def _get_n_nearest_folds(self, n_folds):
@@ -147,6 +149,7 @@ class VizDependence(Data):
         """Calculate dependence dataframe"""
         test_target = np.where(self._test[self.target_col] > 50, 1, 0)
         test_obs = self._get_observations(test_target)
+        pvalores = []
         for n_fold in n_folds:
             fold_idx = self._fold_idx[self._fold_idx[self.fold_col] == n_fold].index
             fold_target = np.where(
@@ -155,9 +158,13 @@ class VizDependence(Data):
             fold_obs = self._get_observations(fold_target)
             obs = np.array([fold_obs, test_obs])
             _, p_value, _, _ = chi2_contingency(obs)
+            pvalores.append(p_value)
             alpha = 1.0 - self.prob
-            if p_value >= alpha and len(fold_idx) > 30:
+            if p_value >= alpha and len(fold_idx) > 0:
                 self._dependence.loc[int(fold), method] += 1
+        if fold == "43":
+            self._tosee[method] = pvalores
+            
 
     def _generate_dependence_plot(self):
         """Generates dependece heatmap"""
@@ -176,7 +183,7 @@ class VizDependence(Data):
         )
         plt.xticks(rotation=45)
         plt.yticks(rotation=0)
-        file_path = os.path.join(self._cur_dir, "dependence_heatmap.pdf")
+        file_path = os.path.join(self.cur_dir, "dependence_heatmap.pdf")
         fig.savefig(file_path, dpi=300, bbox_inches="tight")
 
     def run(self):
@@ -194,5 +201,5 @@ class VizDependence(Data):
                 self._get_boundary()
                 n_folds = self._get_n_nearest_folds(n_folds=3)
                 self._calculate_dependence(n_folds.keys(), fold, method)
-        self._dependence.to_csv(os.path.join(self._cur_dir, "dependence.csv"))
+        self._dependence.to_csv(os.path.join(self.cur_dir, "dependence.csv"))
         self._generate_dependence_plot()
