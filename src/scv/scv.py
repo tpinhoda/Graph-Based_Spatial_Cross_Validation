@@ -57,8 +57,7 @@ class SpatialCV(Data, ABC):
     def _save_buffered_indexes(self, removing_buffer):
         """Save the indexes of the buffers"""
         train_test_idx = (
-            self.train_data.index.values.tolist()
-            + self.test_data.index.values.tolist()
+            self.train_data.index.values.tolist() + self.test_data.index.values.tolist()
         )
         discarded_idx = [
             _ for _ in self.data.index if _ not in train_test_idx + removing_buffer

@@ -17,7 +17,7 @@ RBUFFER = "RegGBSCV_R"
 
 @dataclass
 class RegGraphBasedSCV(SpatialCV):
-    """Generates the Graph Based Spatial Cross-Validation folds
+    """Generates the Regularization Graph Based Spatial Cross-Validation folds
     Attributes
     ----------
         data: pd.Dataframe
@@ -42,17 +42,21 @@ class RegGraphBasedSCV(SpatialCV):
     type_graph: str = "Sparse"
     sill_target: Dict = field(default_factory=dict)
     sill_reduced: Dict = field(default_factory=dict)
+    sill_max_reduced: Dict = field(default_factory=dict)
     w_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
-    
+
     def _init_fields(self):
-        if self.type_graph == "Sparse": 
-            self.w_matrix = pd.DataFrame(index=self.adj_matrix.index, columns=self.adj_matrix.columns)
+        if self.type_graph == "Sparse":
+            self.w_matrix = pd.DataFrame(
+                index=self.adj_matrix.index, columns=self.adj_matrix.columns
+            )
             self.w_matrix.fillna(1, inplace=True)
         else:
             self.w_matrix = self.adj_matrix
         self.sill_target = {}
         self.sill_reduced = {}
-        
+        self.sill_max_reduced = {}
+
     def _calculate_train_pca(self) -> np.array:
         """Return the PCA first component transformation on the traind data"""
         pca = PCA(n_components=1)
@@ -76,10 +80,11 @@ class RegGraphBasedSCV(SpatialCV):
     ) -> Dict:
         """Calculate the sill for each fold to be used on the selection buffer process"""
         reduced_var = fold_data[X_1DIM_COL].append(self.test_data[X_1DIM_COL]).var()
-        self.sill_reduced[fold_name] = (reduced_var + global_var) / 2
+        # self.sill_reduced[fold_name] = (reduced_var + global_var) / 2
+        self.sill_reduced[fold_name] = reduced_var
         max_var_train = max(self.sill_reduced, key=self.sill_reduced.get)
         for _ in self.sill_reduced:
-            self.sill_reduced[_] = self.sill_reduced[max_var_train]
+            self.sill_max_reduced[_] = self.sill_reduced[max_var_train]
 
     def _initiate_buffers_sills(self) -> Dict:
         """Initialize and calculate the sills for the removing and selectiont procedures"""
@@ -100,7 +105,7 @@ class RegGraphBasedSCV(SpatialCV):
         self.adj_matrix.index = self.adj_matrix.index.astype(self.data.index.dtype)
         self.adj_matrix.columns = self.adj_matrix.columns.astype(self.data.index.dtype)
         self.w_matrix.index = self.w_matrix.index.astype(self.data.index.dtype)
-        self.w_matrix.columns = self.w_matrix.columns.astype(self.data.index.dtype) 
+        self.w_matrix.columns = self.w_matrix.columns.astype(self.data.index.dtype)
 
     @staticmethod
     def _get_neighbors(indexes, adj_matrix) -> List:
@@ -115,8 +120,7 @@ class RegGraphBasedSCV(SpatialCV):
         """Calculate the longest_path from a BFS tree taking the test set as root"""
         path_indexes = self.test_data.index.values.tolist()
         local_data_idx = (
-            self.test_data.index.values.tolist()
-            + self.train_data.index.values.tolist()
+            self.test_data.index.values.tolist() + self.train_data.index.values.tolist()
         )
         matrix = self.adj_matrix.loc[local_data_idx, local_data_idx]
         neighbors = self._get_neighbors(path_indexes, matrix)
@@ -143,9 +147,9 @@ class RegGraphBasedSCV(SpatialCV):
         sum_diff = gamma_dist.sum()
         sum_dist = geo_dist.sum()
         return sum_diff / (2 * sum_dist)
-    
+
     def _get_neighbors_weights(self, fold_data):
-   #     fold_data_nodes = [n for n in fold_data.index if n in self.w_matrix.columns]
+        """Return the matrix weights test set x neighbors"""
         return self.w_matrix.loc[self.test_data.index, fold_data.index]
 
     def _calculate_gamma_by_fold(self, neighbors, attribute) -> Dict:
@@ -175,7 +179,7 @@ class RegGraphBasedSCV(SpatialCV):
         return np.log(1 * size_tree - count_n) / np.log(1 * size_tree)
 
     def _propagate_variance(self, attribute) -> List:
-        """Calculate a buffer region"""
+        """Calculate propagate variance"""
         # Initialize variables
         buffer = []  # containg the index of instaces buffered
         nodes_gamma = {fold: {} for fold in self.train_data[self.fold_col].unique()}
@@ -195,14 +199,19 @@ class RegGraphBasedSCV(SpatialCV):
                     nodes_gamma[fold][node] = gamma
             buffer += h_neighbors
         return nodes_gamma
-    
+
     def _calculate_buffer(self, nodes_propagated, type_attr):
+        """Calculate buffer nodes"""
         buffered_nodes = []
         sill = self.sill_target if type_attr == "target" else self.sill_reduced
         for fold, nodes in nodes_propagated.items():
-            buffered_nodes += [key for key, value in nodes.items() 
-                              if value <= sill[fold]]
+            buffered_nodes += [
+                key for key, value in nodes.items() if value <= sill[fold]
+            ]
         return buffered_nodes
+
+    def _save_nodes_propagated(self, nodes_propagated):
+        """Save the propagated variance as json"""
 
     def run(self):
         """Generate graph-based spatial folds"""
@@ -224,15 +233,17 @@ class RegGraphBasedSCV(SpatialCV):
             # Ensure indexes and columns compatibility
             self._convert_adj_matrix_index_types()
             # Calculate selection buffer
+            nodes_prop_reduced = self._propagate_variance(X_1DIM_COL)
+            selection_buffer = self._calculate_buffer(nodes_prop_reduced, "reduced")
             if self.run_selection:
-                nodes_prop  = nodes_prop = self._propagate_variance(X_1DIM_COL)
-                selection_buffer = self._calculate_buffer(nodes_prop, "reduced")
                 self.train_data = self.train_data.loc[selection_buffer]
             # The train data is used to calcualte the buffer. Thus, the size tree,
             # and the gamma calculation will be influenced by the selection buffer.
             # Calculate removing buffer
-            nodes_prop = self._propagate_variance(self.target_col)
-            removing_buffer = self._calculate_buffer(nodes_prop, "target")
+            nodes_prop_target = self._propagate_variance(self.target_col)
+            removing_buffer = self._calculate_buffer(nodes_prop_target, "target")
+            # removing_buffer = [node for node in removing_buffer if node in selection_buffer]
+            removing_buffer = selection_buffer
             self.train_data.drop(index=removing_buffer, inplace=True)
             # Save buffered data indexes
             self._save_buffered_indexes(removing_buffer)

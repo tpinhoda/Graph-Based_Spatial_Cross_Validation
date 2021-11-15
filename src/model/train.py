@@ -60,11 +60,11 @@ class Train(Data):
         y_train = self.train_data[self.target_col]
         x_train = self.train_data.drop(columns=[self.target_col])
         return x_train, y_train
-    
+
     def _clean_train_data_col(self):
-        clean_cols = [re.sub(r'\W+','', col) for col in self.train_data.columns]
+        clean_cols = [re.sub(r"\W+", "", col) for col in self.train_data.columns]
         self.train_data.columns = clean_cols
-        
+
     def _fit(self, model):
         """Fit the model"""
         x_train, y_train = self._split_data()

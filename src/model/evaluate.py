@@ -11,6 +11,7 @@ import src.utils as utils
 PRED_COL = "PREDICTIONS"
 GROUND_TRUTH_COL = "GROUND_TRUTH"
 
+
 @dataclass(init=True)
 class Evaluate(Data):
     """Represents the predict data process.
@@ -39,9 +40,9 @@ class Evaluate(Data):
     fold_idx: pd.DataFrame = field(default_factory=pd.DataFrame)
     selected_features: Dict = field(default_factory=dict)
     metrics: Dict = field(default_factory=dict)
-    
+
     def _init_fields(self):
-        self.metrics = {} 
+        self.metrics = {}
 
     def _read_predictions(self, data_path):
         """Read the prediction data"""
@@ -64,7 +65,7 @@ class Evaluate(Data):
     def _read_fs(self, data_path):
         """Read selected features json file"""
         self.selected_features = utils.load_json(data_path)
-    
+
     @staticmethod
     def _init_metrics_dict():
         return {
@@ -83,7 +84,6 @@ class Evaluate(Data):
         self._read_test(os.path.join(folds_path, fold))
         self._read_fold_idx_table(os.path.join(folds_path, fold))
         self._read_fs(os.path.join(fs_path, f"{fold}.json"))
-        
 
     def _get_fold_name(self, fold):
         self.metrics["FOLD"].append(fold)

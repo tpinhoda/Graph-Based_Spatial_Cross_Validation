@@ -18,7 +18,7 @@ PIPELINE_MAP: Final = {
         "RBuffer": GraphBasedSCV,
         "SRBuffer": GraphBasedSCV,
         "Optimistic": Optimistic,
-        "RegGBSCV": RegGraphBasedSCV
+        "RegGBSCV": RegGraphBasedSCV,
     },
     "fs": FeatureSelection,
     "train": Train,
@@ -109,7 +109,7 @@ class Pipeline:
             "ml_method": self.ml_method,
             "paper": self.paper,
             "fast": self.fast,
-            "type_graph": self.type_graph
+            "type_graph": self.type_graph,
         }
         return {attr: params.get(attr) for attr in attributes}
 
@@ -130,14 +130,13 @@ class Pipeline:
             data_class = self._get_init_function(process)
         parameters = self._generate_parameters(data_class())
         return data_class(**parameters)
-    
+
     def _init_evaluate(self, process):
         """Initialize evaluate class"""
         eval_class = self._get_init_function(process)
         parameters = self._generate_parameters(eval_class())
         instanced_eval = eval_class(**parameters)
         return instanced_eval
-        
 
     def get_pipeline_order(self):
         """Return pipeline order"""

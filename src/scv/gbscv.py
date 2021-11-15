@@ -41,11 +41,11 @@ class GraphBasedSCV(SpatialCV):
     paper: bool = False
     sill_target: Dict = field(default_factory=dict)
     sill_reduced: Dict = field(default_factory=dict)
-    
+
     def _init_fields(self):
         self.sill_target = {}
         self.sill_reduced = {}
-        
+
     def _calculate_train_pca(self) -> np.array:
         """Return the PCA first component transformation on the traind data"""
         pca = PCA(n_components=1)
@@ -106,8 +106,7 @@ class GraphBasedSCV(SpatialCV):
         """Calculate the longest_path from a BFS tree taking the test set as root"""
         path_indexes = self.test_data.index.values.tolist()
         local_data_idx = (
-            self.test_data.index.values.tolist()
-            + self.train_data.index.values.tolist()
+            self.test_data.index.values.tolist() + self.train_data.index.values.tolist()
         )
         matrix = self.adj_matrix.loc[local_data_idx, local_data_idx]
         neighbors = self._get_neighbors(path_indexes, matrix)

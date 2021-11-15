@@ -164,7 +164,6 @@ class VizDependence(Data):
                 self._dependence.loc[int(fold), method] += 1
         if fold == "43":
             self._tosee[method] = pvalores
-            
 
     def _generate_dependence_plot(self):
         """Generates dependece heatmap"""

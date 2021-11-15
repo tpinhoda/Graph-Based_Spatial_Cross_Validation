@@ -119,16 +119,14 @@ class VizMetrics(Data):
                     method, col
                 ] = f"{describe_df.loc['mean', col]} ({describe_df.loc['std', col]})"
         mean_df.T.to_csv(os.path.join(self.cur_dir, "mean_metrics.csv"))
-    
+
     def tukey_post_hoc_test(self, metric):
         metric_df = pd.DataFrame(columns=self.cv_methods)
         for method, results in self.cv_methods_results.items():
             metric_df[method] = results[metric]
-        metric_df = metric_df.melt(var_name='groups', value_name='values')
-        test = sp.posthoc_tukey(metric_df, val_col='values', group_col='groups')
+        metric_df = metric_df.melt(var_name="groups", value_name="values")
+        test = sp.posthoc_tukey(metric_df, val_col="values", group_col="groups")
         print(test)
-        
-        
 
     def run(self):
         """Runs the visualization step"""

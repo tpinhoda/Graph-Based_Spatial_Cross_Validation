@@ -49,8 +49,7 @@ def main():
         paper=True,
         switchers=SWITCHERS,
         fast=False,
-        type_graph="Sparse"
-        
+        type_graph="Sparse",
     )
     pipeline.run()
     exit()
