@@ -1,0 +1,11 @@
+rich
+python-dotenv
+coloredlogs
+dataclasses
+geopandas
+logging
+typing
+sklearn
+python-weka-wrapper3
+scikit_posthocs
+scipy
