@@ -5,6 +5,7 @@ import inspect
 import pandas as pd
 from src.scv.optimistic import Optimistic
 from src.scv.gbscv import GraphBasedSCV
+from src.scv.reg_gbscv import RegGraphBasedSCV
 from src.scv.ultra_coservative import UltraConservative
 from src.feature_selection.fs import FeatureSelection
 from src.model.train import Train
@@ -17,6 +18,7 @@ PIPELINE_MAP: Final = {
         "RBuffer": GraphBasedSCV,
         "SRBuffer": GraphBasedSCV,
         "Optimistic": Optimistic,
+        "RegGBSCV": RegGraphBasedSCV
     },
     "fs": FeatureSelection,
     "train": Train,
@@ -74,6 +76,7 @@ class Pipeline:
     ml_method: str = None
     paper: bool = False
     fast: bool = False
+    type_graph: str = None
     switchers: Dict[str, str] = field(default_factory=dict)
     pipeline: List[str] = field(default_factory=list)
 
@@ -105,7 +108,8 @@ class Pipeline:
             "fs_method": self.fs_method,
             "ml_method": self.ml_method,
             "paper": self.paper,
-            "fast": self.fast
+            "fast": self.fast,
+            "type_graph": self.type_graph
         }
         return {attr: params.get(attr) for attr in attributes}
 

@@ -9,10 +9,10 @@ from src.visualization.dependence import VizDependence
 
 SWITCHERS = {
     "scv": True,
-    "fs": True,
-    "train": True,
-    "predict": True,
-    "evaluate": True,
+    "fs": False,
+    "train": False,
+    "predict": False,
+    "evaluate": False,
 }
 
 
@@ -41,16 +41,19 @@ def main():
         index_col="INDEX",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
-        scv_method="UltraConservative",
+        scv_method="RegGBSCV",
         run_selection=False,
         kappa=20,
         fs_method="CFS",
         ml_method="LGBM",
         paper=True,
         switchers=SWITCHERS,
-        fast=False
+        fast=False,
+        type_graph="Sparse"
+        
     )
-
+    pipeline.run()
+    exit()
     viz_metrics = VizMetrics(
         root_path=env_var["root_path"],
         cv_methods=["UltraConservative", "SRBuffer", "RBuffer", "Optimistic"],
@@ -71,7 +74,6 @@ def main():
         paper=True,
     )
 
-    pipeline.run()
     viz_metrics.run()
     viz_dependence.run()
 
