@@ -1,6 +1,6 @@
 """Pipeline to analyse electoral data"""
 from dataclasses import dataclass, field
-from typing import Dict, Final, List, Optional
+from typing import Dict, List, Optional
 import inspect
 import pandas as pd
 from src.scv.optimistic import Optimistic
@@ -12,7 +12,7 @@ from src.model.train import Train
 from src.model.predict import Predict
 from src.model.evaluate import Evaluate
 
-PIPELINE_MAP: Final = {
+PIPELINE_MAP = {
     "scv": {
         "UltraConservative": UltraConservative,
         "RBuffer": GraphBasedSCV,
