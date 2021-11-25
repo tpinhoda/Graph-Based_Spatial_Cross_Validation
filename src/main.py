@@ -9,10 +9,10 @@ from src.visualization.dependence import VizDependence
 
 SWITCHERS = {
     "scv": True,
-    "fs": False,
-    "train": False,
-    "predict": False,
-    "evaluate": False,
+    "fs": True,
+    "train": True,
+    "predict": True,
+    "evaluate": True,
 }
 
 
@@ -27,35 +27,40 @@ def main():
     env_var = utils.load_env_variables(project_dir)
     # Load data
     path = os.path.join(env_var["root_path"], "data.csv")
-    data = pd.read_csv(path, index_col="INDEX", low_memory=False)
+    data = pd.read_csv(path, index_col="code_muni", low_memory=False)
     # Load adjacency matrix
     adj_matrix = pd.read_csv(
         os.path.join(env_var["root_path"], "queen_matrix.csv"), low_memory=False
     )
+    w_matrix = pd.read_csv(
+        os.path.join(env_var["root_path"], "normd_matrix.csv"), low_memory=False
+    )
     adj_matrix.set_index(adj_matrix.columns[0], inplace=True)
+    w_matrix.set_index(w_matrix.columns[0], inplace=True)
     # Instanciate pipeline
     pipeline = Pipeline(
         root_path=env_var["root_path"],
         data=data,
         adj_matrix=adj_matrix,
-        index_col="INDEX",
+        w_matrix=w_matrix,
+        index_col="code_muni",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
         scv_method="RegGBSCV",
         run_selection=False,
-        kappa=20,
-        fs_method="CFS",
+        kappa=1,
+        fs_method="Pearson",
         ml_method="LGBM",
         paper=True,
         switchers=SWITCHERS,
         fast=False,
-        type_graph="Sparse",
+        type_graph="Weighted",
     )
     pipeline.run()
     exit()
     viz_metrics = VizMetrics(
         root_path=env_var["root_path"],
-        cv_methods=["UltraConservative", "SRBuffer", "RBuffer", "Optimistic"],
+        cv_methods=["UltraConservative", "SRBuffer", "Optimistic", "RegGBSCV"],
         index_col="FOLD",
         fs_method="CFS",
         ml_method="LGBM",
@@ -63,7 +68,7 @@ def main():
 
     viz_dependence = VizDependence(
         root_path=env_var["root_path"],
-        cv_methods=["UltraConservative", "SRBuffer", "RBuffer", "Optimistic"],
+        cv_methods=["UltraConservative", "SRBuffer", "Optimistic", "RegGBSCV"],
         index_col="INDEX",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",

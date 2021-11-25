@@ -41,6 +41,12 @@ class FeatureSelection(Data):
         """Position the target column in the dataset last position"""
         cols = [c for c in data.columns if c != self.target_col]
         return data[cols + [self.target_col]]
+    
+    def _cor_fs(self, data) -> List:
+        """Runs correlation based feature selections"""
+        cor = data.drop(columns=[self.target_col]).corrwith(data[self.target_col])
+        features = cor.nlargest(100)
+        return features.index.values.tolist()
 
     def _weka_cfs(self, data) -> List:
         """Runs the CFS method from WEKA"""
@@ -74,7 +80,8 @@ class FeatureSelection(Data):
         """Runs the feature selection per fold"""
         self.logger_info("Starting JVM to execute Weka CFS.")
         self.logger_warning("Some warnings may appear.")
-        jvm.start()
+        if self.fs_method == "CFS":
+            jvm.start()
         self._make_folders(
             ["results", self.scv_method, "features_selected", self.fs_method]
         )
@@ -83,6 +90,12 @@ class FeatureSelection(Data):
         for fold in tqdm(folds_name, desc="Selecting Features"):
             data = pd.read_feather(os.path.join(folds_path, fold, "train.ftr"))
             data.set_index(self.index_col, inplace=True)
-            selected_features = self._weka_cfs(data)
+            if self.fs_method == "CFS":
+                selected_features = self._weka_cfs(data)
+            elif self.fs_method == "Pearson":
+                selected_features = self._cor_fs(data)
+            else:
+                continue
             self._save_selected_features(selected_features, fold)
-        jvm.stop()
+        if self.fs_method == "CFS":
+            jvm.stop()

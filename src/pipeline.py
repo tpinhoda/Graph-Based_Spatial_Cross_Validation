@@ -18,7 +18,7 @@ PIPELINE_MAP = {
         "RBuffer": GraphBasedSCV,
         "SRBuffer": GraphBasedSCV,
         "Optimistic": Optimistic,
-        "RegGBSCV": RegGraphBasedSCV,
+        "RegGBSCV": RegGraphBasedSCV
     },
     "fs": FeatureSelection,
     "train": Train,
@@ -66,6 +66,7 @@ class Pipeline:
     root_path: str = None
     data: pd.DataFrame = field(default_factory=pd.DataFrame)
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
+    w_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     index_col: str = None
     fold_col: str = None
     target_col: str = None
@@ -99,6 +100,7 @@ class Pipeline:
             "root_path": self.root_path,
             "data": self.data,
             "adj_matrix": self.adj_matrix,
+            "w_matrix": self.w_matrix,
             "index_col": self.index_col,
             "fold_col": self.fold_col,
             "target_col": self.target_col,
@@ -111,6 +113,12 @@ class Pipeline:
             "fast": self.fast,
             "type_graph": self.type_graph,
         }
+        if params["scv_method"] == "RegGBSCV":
+            if params["run_selection"]:
+                params["scv_method"] = f"RegGBSCV_SR_Kappa_{self.kappa}"
+            else:
+                params["scv_method"] = f"RegGBSCV_R_Kappa_{self.kappa}"
+                
         return {attr: params.get(attr) for attr in attributes}
 
     def _generate_parameters(self, process):

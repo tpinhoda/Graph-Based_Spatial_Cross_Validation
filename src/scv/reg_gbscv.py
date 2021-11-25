@@ -11,9 +11,6 @@ from src.scv.scv import SpatialCV
 
 
 X_1DIM_COL = "X_1DIM"
-SRBUFFER = "RegGBSCV_SR"
-RBUFFER = "RegGBSCV_R"
-
 
 @dataclass
 class RegGraphBasedSCV(SpatialCV):
@@ -34,7 +31,7 @@ class RegGraphBasedSCV(SpatialCV):
             Root path
     """
 
-    kappa: int = 20
+    kappa: float = 0.5
     run_selection: bool = False
     target_col: str = "TARGET"
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
@@ -51,8 +48,6 @@ class RegGraphBasedSCV(SpatialCV):
                 index=self.adj_matrix.index, columns=self.adj_matrix.columns
             )
             self.w_matrix.fillna(1, inplace=True)
-        else:
-            self.w_matrix = self.adj_matrix
         self.sill_target = {}
         self.sill_reduced = {}
         self.sill_max_reduced = {}
@@ -135,37 +130,32 @@ class RegGraphBasedSCV(SpatialCV):
         """Calculate the similarity matrix between test set and a given training
         fold set based on a given attribute"""
         test_values = self.test_data[attribute].to_numpy()
-        fold_values = fold_data[attribute].to_numpy()
-        return np.subtract.outer(test_values, fold_values) ** 2
+        node_values = fold_data[attribute]
+        return (test_values - node_values) ** 2
 
     @staticmethod
-    def _calculate_gamma(similarity, geo_weights) -> np.float64:
+    def _calculate_gamma(similarity, geo_weights, kappa) -> np.float64:
         """Calculate gamma or the semivariogram"""
-        gamma_dist = np.multiply(similarity, geo_weights)
-        gamma_dist = np.sum(gamma_dist, axis=1)
-        geo_dist = np.sum(geo_weights, axis=1)
-        sum_diff = gamma_dist.sum()
-        sum_dist = geo_dist.sum()
+        gamma_dist = similarity*kappa + geo_weights*(1-kappa)
+        sum_diff = np.sum(gamma_dist)
+        sum_dist = len((similarity))
         return sum_diff / (2 * sum_dist)
 
-    def _get_neighbors_weights(self, fold_data):
+    def _get_neighbors_weights(self, index):
         """Return the matrix weights test set x neighbors"""
-        return self.w_matrix.loc[self.test_data.index, fold_data.index]
+        return self.w_matrix.loc[self.test_data.index, index]
 
-    def _calculate_gamma_by_fold(self, neighbors, attribute) -> Dict:
+    def _calculate_gamma_by_node(self, neighbors, attribute, kappa) -> Dict:
         """Calculate the semivariogram by folds"""
-        context_gamma = {}
+        nodes_gamma = {}
         neighbors = [n for n in neighbors if n in self.train_data.index]
         neighbors_data = self.train_data.loc[neighbors]
-        for fold, fold_data in neighbors_data.groupby(by=self.fold_col):
-            similarity = self._calculate_similarity_matrix(fold_data, attribute)
-            geo_weights = self._get_neighbors_weights(fold_data)
-            gamma = self._calculate_gamma(similarity, geo_weights)
-            context_gamma[fold] = {
-                "gamma": gamma,
-                "neighbors": fold_data.index.values.tolist(),
-            }
-        return context_gamma
+        for index, node_data in neighbors_data.iterrows():
+            similarity = self._calculate_similarity_matrix(node_data, attribute)
+            geo_weights = self._get_neighbors_weights(index)
+            gamma = self._calculate_gamma(similarity, geo_weights, kappa)
+            nodes_gamma[index] = gamma
+        return nodes_gamma
 
     def _get_n_fold_neighbohood(self) -> int:
         """Get ne number of folds neighbors from the test set"""
@@ -178,11 +168,11 @@ class RegGraphBasedSCV(SpatialCV):
         """Caclulate the decay exponent"""
         return np.log(1 * size_tree - count_n) / np.log(1 * size_tree)
 
-    def _propagate_variance(self, attribute) -> List:
+    def _propagate_variance(self, attribute, kappa) -> List:
         """Calculate propagate variance"""
         # Initialize variables
         buffer = []  # containg the index of instaces buffered
-        nodes_gamma = {fold: {} for fold in self.train_data[self.fold_col].unique()}
+        nodes_gamma = {}
         # Start creating the buffer
         while len(buffer) < self.train_data.shape[0]:
             # Get the instance indexes from te test set + the indexes buffer
@@ -190,36 +180,37 @@ class RegGraphBasedSCV(SpatialCV):
             # Get the neighbor
             h_neighbors = self._get_neighbors(growing_graph_idx, self.adj_matrix)
             # Calculate the semivariogram for each fold in the neighborhood
-            h_gamma = self._calculate_gamma_by_fold(h_neighbors, attribute)
-            # Check for each fold in the neighborhood the semivariogram to decide
-            # whether to add or not the instances into the buffer list
-            for fold, h_fold_gamma in h_gamma.items():
-                gamma = h_fold_gamma["gamma"]
-                for node in h_fold_gamma["neighbors"]:
-                    nodes_gamma[fold][node] = gamma
+            nodes_gamma.update(self._calculate_gamma_by_node(h_neighbors, attribute, kappa))
             buffer += h_neighbors
         return nodes_gamma
 
-    def _calculate_buffer(self, nodes_propagated, type_attr):
+    
+    def _calculate_selection_buffer(self, nodes_propagated, attribute):
         """Calculate buffer nodes"""
         buffered_nodes = []
-        sill = self.sill_target if type_attr == "target" else self.sill_reduced
-        for fold, nodes in nodes_propagated.items():
-            buffered_nodes += [
-                key for key, value in nodes.items() if value <= sill[fold]
-            ]
+        sill = self.data[attribute].var()
+        buffered_nodes = [node for node, gamma in nodes_propagated.items() 
+                          if gamma < sill]
         return buffered_nodes
+    
+    def _calculate_removing_buffer(self, nodes_propagated, nodes_reduced, attribute):
+        """Calculate buffer nodes"""
+        sill_target = self.test_data[attribute].var()
+        sill_reduced = self.test_data[X_1DIM_COL].var()
+        buffered_nodes_target = [node for node, gamma in nodes_propagated.items() 
+                          if gamma < sill_target]
+        buffered_nodes_reduced = [node for node, gamma in nodes_reduced.items() 
+                          if gamma < sill_reduced]
+        #return [node for node in buffered_nodes_target if node in buffered_nodes_reduced]
+        return buffered_nodes_target
 
-    def _save_nodes_propagated(self, nodes_propagated):
-        """Save the propagated variance as json"""
 
     def run(self):
         """Generate graph-based spatial folds"""
         # Create folder folds
         start_time = time.time()
-        name_folds = SRBUFFER if self.run_selection else RBUFFER
         self._init_fields()
-        self._make_folders(["folds", name_folds])
+        self._make_folders(["folds", self.scv_method])
         self.data[X_1DIM_COL] = self._calculate_train_pca()
         for fold_name, test_data in tqdm(
             self.data.groupby(by=self.fold_col), desc="Creating folds"
@@ -233,17 +224,17 @@ class RegGraphBasedSCV(SpatialCV):
             # Ensure indexes and columns compatibility
             self._convert_adj_matrix_index_types()
             # Calculate selection buffer
-            nodes_prop_reduced = self._propagate_variance(X_1DIM_COL)
-            selection_buffer = self._calculate_buffer(nodes_prop_reduced, "reduced")
+            nodes_prop_reduced = self._propagate_variance(X_1DIM_COL, self.kappa)
+            selection_buffer = self._calculate_selection_buffer(nodes_prop_reduced, X_1DIM_COL)
             if self.run_selection:
                 self.train_data = self.train_data.loc[selection_buffer]
             # The train data is used to calcualte the buffer. Thus, the size tree,
             # and the gamma calculation will be influenced by the selection buffer.
             # Calculate removing buffer
-            nodes_prop_target = self._propagate_variance(self.target_col)
-            removing_buffer = self._calculate_buffer(nodes_prop_target, "target")
-            # removing_buffer = [node for node in removing_buffer if node in selection_buffer]
-            removing_buffer = selection_buffer
+            nodes_prop_target = self._propagate_variance(self.target_col, self.kappa)
+            removing_buffer = self._calculate_removing_buffer(nodes_prop_target, nodes_prop_reduced, self.target_col)
+            #removing_buffer = [node for node in removing_buffer if node in selection_buffer]
+            #removing_buffer = selection_buffer
             self.train_data.drop(index=removing_buffer, inplace=True)
             # Save buffered data indexes
             self._save_buffered_indexes(removing_buffer)
@@ -254,7 +245,7 @@ class RegGraphBasedSCV(SpatialCV):
             # Save data
             self._save_data()
             # Update cur dir
-            self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
+            self.cur_dir = os.path.join(self._get_root_path(), "folds", self.scv_method)
         # Save execution time
         end_time = time.time()
         self._save_time(end_time, start_time)

@@ -74,7 +74,7 @@ class Evaluate(Data):
             "TRAIN_SIZE": [],
             "TEST_SIZE": [],
             "N_FEATURES": [],
-            "RMSE": [],
+            "RMSE": []
         }
 
     def _initialize_data(self, folds_path, pred_path, fs_path, fold):
