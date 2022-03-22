@@ -7,6 +7,7 @@ from src.scv.optimistic import Optimistic
 from src.scv.gbscv import GraphBasedSCV
 from src.scv.reg_gbscv import RegGraphBasedSCV
 from src.scv.ultra_coservative import UltraConservative
+from src.scv.traditional_scv import TraditionalSCV
 from src.feature_selection.fs import FeatureSelection
 from src.model.train import Train
 from src.model.predict import Predict
@@ -15,10 +16,11 @@ from src.model.evaluate import Evaluate
 PIPELINE_MAP = {
     "scv": {
         "UltraConservative": UltraConservative,
+        "TraditionalSCV": TraditionalSCV,
         "RBuffer": GraphBasedSCV,
         "SRBuffer": GraphBasedSCV,
         "Optimistic": Optimistic,
-        "RegGBSCV": RegGraphBasedSCV
+        "RegGBSCV": RegGraphBasedSCV,
     },
     "fs": FeatureSelection,
     "train": Train,
@@ -66,8 +68,10 @@ class Pipeline:
     root_path: str = None
     data: pd.DataFrame = field(default_factory=pd.DataFrame)
     adj_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
+    meshblocks: pd.DataFrame = field(default_factory=pd.DataFrame)
     w_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     index_col: str = None
+    index_meshblocks: str = None
     fold_col: str = None
     target_col: str = None
     scv_method: str = None
@@ -100,8 +104,10 @@ class Pipeline:
             "root_path": self.root_path,
             "data": self.data,
             "adj_matrix": self.adj_matrix,
+            "meshblocks": self.meshblocks,
             "w_matrix": self.w_matrix,
             "index_col": self.index_col,
+            "index_meshblocks": self.index_meshblocks,
             "fold_col": self.fold_col,
             "target_col": self.target_col,
             "scv_method": self.scv_method,
@@ -118,7 +124,7 @@ class Pipeline:
                 params["scv_method"] = f"RegGBSCV_SR_Kappa_{self.kappa}"
             else:
                 params["scv_method"] = f"RegGBSCV_R_Kappa_{self.kappa}"
-                
+
         return {attr: params.get(attr) for attr in attributes}
 
     def _generate_parameters(self, process):
@@ -143,8 +149,7 @@ class Pipeline:
         """Initialize evaluate class"""
         eval_class = self._get_init_function(process)
         parameters = self._generate_parameters(eval_class())
-        instanced_eval = eval_class(**parameters)
-        return instanced_eval
+        return eval_class(**parameters)
 
     def get_pipeline_order(self):
         """Return pipeline order"""

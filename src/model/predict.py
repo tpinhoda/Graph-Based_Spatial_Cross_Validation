@@ -40,10 +40,10 @@ class Predict(Data):
     test_data: pd.DataFrame = field(default_factory=pd.DataFrame)
     predictions: List = field(default_factory=list)
 
-    def _read_test_data(self, data_path):
+    def _read_test_data(self, json_path, data):
         """Read the training data"""
-        self.test_data = pd.read_feather(os.path.join(data_path, "test.ftr"))
-        self.test_data.set_index(self.index_col, inplace=True)
+        split_fold_idx = utils.load_json(os.path.join(json_path, "split_data.json"))
+        self.test_data = data.loc[split_fold_idx["test"]].copy()
 
     def _selected_features_filtering(self, json_path):
         """Filter only the features selected"""
@@ -76,6 +76,8 @@ class Predict(Data):
 
     def run(self):
         """Runs the predicting process per fold"""
+        data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
+        data.set_index(self.index_col, inplace=True)
         self._make_folders(
             [
                 "results",
@@ -93,7 +95,7 @@ class Predict(Data):
         )
         folds_name = self._get_folders_in_dir(folds_path)
         for fold in tqdm(folds_name, desc="Predicting test set"):
-            self._read_test_data(os.path.join(folds_path, fold))
+            self._read_test_data(os.path.join(folds_path, fold), data)
             self._selected_features_filtering(os.path.join(fs_path, f"{fold}.json"))
             model = self.load_model(os.path.join(ml_path, f"{fold}.pkl"))
             self._predict(model)

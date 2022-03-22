@@ -12,6 +12,7 @@ from src.scv.scv import SpatialCV
 
 X_1DIM_COL = "X_1DIM"
 
+
 @dataclass
 class RegGraphBasedSCV(SpatialCV):
     """Generates the Regularization Graph Based Spatial Cross-Validation folds
@@ -136,7 +137,7 @@ class RegGraphBasedSCV(SpatialCV):
     @staticmethod
     def _calculate_gamma(similarity, geo_weights, kappa) -> np.float64:
         """Calculate gamma or the semivariogram"""
-        gamma_dist = similarity*kappa + geo_weights*(1-kappa)
+        gamma_dist = similarity - (kappa * (1 - geo_weights) * similarity)
         sum_diff = np.sum(gamma_dist)
         sum_dist = len((similarity))
         return sum_diff / (2 * sum_dist)
@@ -180,30 +181,37 @@ class RegGraphBasedSCV(SpatialCV):
             # Get the neighbor
             h_neighbors = self._get_neighbors(growing_graph_idx, self.adj_matrix)
             # Calculate the semivariogram for each fold in the neighborhood
-            nodes_gamma.update(self._calculate_gamma_by_node(h_neighbors, attribute, kappa))
+            nodes_gamma.update(
+                self._calculate_gamma_by_node(h_neighbors, attribute, kappa)
+            )
             buffer += h_neighbors
         return nodes_gamma
 
-    
     def _calculate_selection_buffer(self, nodes_propagated, attribute):
         """Calculate buffer nodes"""
         buffered_nodes = []
         sill = self.data[attribute].var()
-        buffered_nodes = [node for node, gamma in nodes_propagated.items() 
-                          if gamma < sill]
+        buffered_nodes = [
+            node for node, gamma in nodes_propagated.items() if gamma < sill
+        ]
         return buffered_nodes
-    
+
     def _calculate_removing_buffer(self, nodes_propagated, nodes_reduced, attribute):
         """Calculate buffer nodes"""
         sill_target = self.test_data[attribute].var()
+        # sill_w_matrix = self.w_matrix.to_numpy().var()
         sill_reduced = self.test_data[X_1DIM_COL].var()
-        buffered_nodes_target = [node for node, gamma in nodes_propagated.items() 
-                          if gamma < sill_target]
-        buffered_nodes_reduced = [node for node, gamma in nodes_reduced.items() 
-                          if gamma < sill_reduced]
-        #return [node for node in buffered_nodes_target if node in buffered_nodes_reduced]
-        return buffered_nodes_target
 
+        # sill_target = self.kappa * sill_target + (1 - self.kappa) * sill_w_matrix
+
+        buffered_nodes_target = [
+            node for node, gamma in nodes_propagated.items() if gamma < sill_target
+        ]
+        buffered_nodes_reduced = [
+            node for node, gamma in nodes_reduced.items() if gamma < sill_reduced
+        ]
+        # return [node for node in buffered_nodes_target if node in buffered_nodes_reduced]
+        return buffered_nodes_target
 
     def run(self):
         """Generate graph-based spatial folds"""
@@ -215,37 +223,46 @@ class RegGraphBasedSCV(SpatialCV):
         for fold_name, test_data in tqdm(
             self.data.groupby(by=self.fold_col), desc="Creating folds"
         ):
-            # Cread fold folder
-            self._mkdir(str(fold_name))
-            # Initialize x , y and reduce
-            self._split_data_test_train(test_data)
-            # Calculate local sill
-            self._initiate_buffers_sills()
-            # Ensure indexes and columns compatibility
-            self._convert_adj_matrix_index_types()
-            # Calculate selection buffer
-            nodes_prop_reduced = self._propagate_variance(X_1DIM_COL, self.kappa)
-            selection_buffer = self._calculate_selection_buffer(nodes_prop_reduced, X_1DIM_COL)
-            if self.run_selection:
-                self.train_data = self.train_data.loc[selection_buffer]
-            # The train data is used to calcualte the buffer. Thus, the size tree,
-            # and the gamma calculation will be influenced by the selection buffer.
-            # Calculate removing buffer
-            nodes_prop_target = self._propagate_variance(self.target_col, self.kappa)
-            removing_buffer = self._calculate_removing_buffer(nodes_prop_target, nodes_prop_reduced, self.target_col)
-            #removing_buffer = [node for node in removing_buffer if node in selection_buffer]
-            #removing_buffer = selection_buffer
-            self.train_data.drop(index=removing_buffer, inplace=True)
-            # Save buffered data indexes
-            self._save_buffered_indexes(removing_buffer)
-            # Save fold index relation table
-            self._save_fold_by_index_training()
-            # Clean data
-            self._clean_data(cols_drop=[X_1DIM_COL, self.fold_col])
-            # Save data
-            self._save_data()
-            # Update cur dir
-            self.cur_dir = os.path.join(self._get_root_path(), "folds", self.scv_method)
+            if fold_name != -1:
+                # Cread fold folder
+                self._mkdir(str(fold_name))
+                # Initialize x , y and reduce
+                self._split_data_test_train(test_data)
+                # Calculate local sill
+                self._initiate_buffers_sills()
+                # Ensure indexes and columns compatibility
+                self._convert_adj_matrix_index_types()
+                # Calculate selection buffer
+                nodes_prop_reduced = self._propagate_variance(X_1DIM_COL, self.kappa)
+                selection_buffer = self._calculate_selection_buffer(
+                    nodes_prop_reduced, X_1DIM_COL
+                )
+                if self.run_selection:
+                    self.train_data = self.train_data.loc[selection_buffer]
+                # The train data is used to calcualte the buffer. Thus, the size tree,
+                # and the gamma calculation will be influenced by the selection buffer.
+                # Calculate removing buffer
+                nodes_prop_target = self._propagate_variance(
+                    self.target_col, self.kappa
+                )
+                removing_buffer = self._calculate_removing_buffer(
+                    nodes_prop_target, nodes_prop_reduced, self.target_col
+                )
+                # removing_buffer = [node for node in removing_buffer if node in selection_buffer]
+                # removing_buffer = selection_buffer
+                self.train_data.drop(index=removing_buffer, inplace=True)
+                # Save buffered data indexes
+                self._save_buffered_indexes(removing_buffer)
+                # Save fold index relation table
+                self._save_fold_by_index_training()
+                # Clean data
+                self._clean_data(cols_drop=[X_1DIM_COL, self.fold_col])
+                # Save data
+                # self._save_data()
+                # Update cur dir
+                self.cur_dir = os.path.join(
+                    self._get_root_path(), "folds", self.scv_method
+                )
         # Save execution time
         end_time = time.time()
         self._save_time(end_time, start_time)

@@ -48,13 +48,15 @@ class Evaluate(Data):
         """Read the prediction data"""
         self.predictions = pd.read_csv(data_path, index_col=self.index_col)
 
-    def _read_train(self, data_path):
+    def _read_train(self, json_path, data):
         """Read the train data"""
-        self.train = pd.read_feather(os.path.join(data_path, "train.ftr"))
+        split_fold_idx = utils.load_json(os.path.join(json_path, "split_data.json"))
+        self.train = data.loc[split_fold_idx["train"]].copy()
 
-    def _read_test(self, data_path):
+    def _read_test(self, json_path, data):
         """Read the test data"""
-        self.test = pd.read_feather(os.path.join(data_path, "test.ftr"))
+        split_fold_idx = utils.load_json(os.path.join(json_path, "split_data.json"))
+        self.test = data.loc[split_fold_idx["test"]].copy()
 
     def _read_fold_idx_table(self, data_path):
         """Read the fold_by_idx data"""
@@ -74,14 +76,16 @@ class Evaluate(Data):
             "TRAIN_SIZE": [],
             "TEST_SIZE": [],
             "N_FEATURES": [],
-            "RMSE": []
+            "RMSE": [],
         }
 
     def _initialize_data(self, folds_path, pred_path, fs_path, fold):
         """Load all data"""
+        data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
+        data.set_index(self.index_col, inplace=True)
         self._read_predictions(os.path.join(pred_path, f"{fold}.csv"))
-        self._read_train(os.path.join(folds_path, fold))
-        self._read_test(os.path.join(folds_path, fold))
+        self._read_train(os.path.join(folds_path, fold), data)
+        self._read_test(os.path.join(folds_path, fold), data)
         self._read_fold_idx_table(os.path.join(folds_path, fold))
         self._read_fs(os.path.join(fs_path, f"{fold}.json"))
 

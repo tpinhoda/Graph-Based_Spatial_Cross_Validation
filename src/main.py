@@ -27,7 +27,11 @@ def main():
     env_var = utils.load_env_variables(project_dir)
     # Load data
     path = os.path.join(env_var["root_path"], "data.csv")
-    data = pd.read_csv(path, index_col="code_muni", low_memory=False)
+    data = pd.read_csv(path, index_col="INDEX", low_memory=False)
+    try:
+        data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
+    except KeyError:
+        pass
     # Load adjacency matrix
     adj_matrix = pd.read_csv(
         os.path.join(env_var["root_path"], "queen_matrix.csv"), low_memory=False
@@ -43,15 +47,15 @@ def main():
         data=data,
         adj_matrix=adj_matrix,
         w_matrix=w_matrix,
-        index_col="code_muni",
+        index_col="INDEX",
         fold_col="INDEX_FOLDS",
         target_col="TARGET",
         scv_method="RegGBSCV",
         run_selection=False,
-        kappa=1,
+        kappa=0.1,
         fs_method="Pearson",
         ml_method="LGBM",
-        paper=True,
+        paper=False,
         switchers=SWITCHERS,
         fast=False,
         type_graph="Weighted",

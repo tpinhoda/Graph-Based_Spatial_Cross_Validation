@@ -9,6 +9,7 @@ from weka.core import jvm
 from weka.attribute_selection import ASEvaluation, ASSearch, AttributeSelection
 from weka.core.dataset import create_instances_from_matrices
 from src.data import Data
+from src import utils
 
 
 @dataclass
@@ -41,12 +42,19 @@ class FeatureSelection(Data):
         """Position the target column in the dataset last position"""
         cols = [c for c in data.columns if c != self.target_col]
         return data[cols + [self.target_col]]
-    
+
     def _cor_fs(self, data) -> List:
         """Runs correlation based feature selections"""
-        cor = data.drop(columns=[self.target_col]).corrwith(data[self.target_col])
+        cor = data.drop(columns=[self.target_col, self.fold_col]).corrwith(
+            data[self.target_col]
+        )
         features = cor.nlargest(100)
         return features.index.values.tolist()
+
+    def _all_fs(self, data) -> List:
+        """Select all data"""
+        data.drop(columns=[self.target_col], inplace=True)
+        return data.columns.values.tolist()
 
     def _weka_cfs(self, data) -> List:
         """Runs the CFS method from WEKA"""
@@ -78,24 +86,41 @@ class FeatureSelection(Data):
 
     def run(self):
         """Runs the feature selection per fold"""
-        self.logger_info("Starting JVM to execute Weka CFS.")
-        self.logger_warning("Some warnings may appear.")
-        if self.fs_method == "CFS":
-            jvm.start()
+        data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
+        reorganized_cols = [
+            col for col in data.columns if col not in [self.target_col, self.fold_col]
+        ]
+        reorganized_cols.append(self.target_col)
+        data = data[reorganized_cols]
+        try:
+            data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
+        except KeyError:
+            pass
+        data.set_index(self.index_col, inplace=True)
+
+        # if self.fs_method == "CFS":
+        #    self.logger_info("Starting JVM to execute Weka CFS.")
+        #    self.logger_warning("Some warnings may appear.")
+        #    jvm.start()
         self._make_folders(
             ["results", self.scv_method, "features_selected", self.fs_method]
         )
         folds_path = os.path.join(self.root_path, "folds", self.scv_method)
         folds_name = self._get_folders_in_dir(folds_path)
+
         for fold in tqdm(folds_name, desc="Selecting Features"):
-            data = pd.read_feather(os.path.join(folds_path, fold, "train.ftr"))
-            data.set_index(self.index_col, inplace=True)
+            split_fold_idx = utils.load_json(
+                os.path.join(folds_path, fold, "split_data.json")
+            )
+            training_data = data.loc[split_fold_idx["train"]].copy()
             if self.fs_method == "CFS":
-                selected_features = self._weka_cfs(data)
+                selected_features = self._weka_cfs(training_data)
             elif self.fs_method == "Pearson":
-                selected_features = self._cor_fs(data)
+                selected_features = self._cor_fs(training_data)
+            elif self.fs_method == "All":
+                selected_features = self._all_fs(training_data)
             else:
                 continue
             self._save_selected_features(selected_features, fold)
-        if self.fs_method == "CFS":
-            jvm.stop()
+        # if self.fs_method == "CFS":
+        #    jvm.stop()

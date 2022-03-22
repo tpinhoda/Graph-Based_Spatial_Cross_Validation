@@ -92,11 +92,21 @@ class VizMetrics(Data):
                     ax=fig_ax,
                     dashes=True,
                     linewidth=5,
-                    palette=["#0070C0", "#00B050", "#AFABAB", "#FF0000"],
+                    palette=[
+                        "#16b004",
+                        "#6e1703",
+                        "#6e1703",
+                        "#6e1703",
+                        "#6e1703",
+                        "#6e1703",
+                        "#6e1703",
+                        "#f8ff0a",
+                    ],
+                    # palette="Set1"
                 )
 
                 fig_ax.legend(
-                    bbox_to_anchor=(0.5, -0.5),
+                    bbox_to_anchor=(0.5, -1.0),
                     loc="lower center",
                     ncol=4,
                     borderaxespad=0.0,
@@ -121,6 +131,7 @@ class VizMetrics(Data):
         mean_df.T.to_csv(os.path.join(self.cur_dir, "mean_metrics.csv"))
 
     def tukey_post_hoc_test(self, metric):
+        """Generate post hoc statistics"""
         metric_df = pd.DataFrame(columns=self.cv_methods)
         for method, results in self.cv_methods_results.items():
             metric_df[method] = results[metric]

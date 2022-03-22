@@ -19,6 +19,7 @@ class SpatialCV(Data, ABC):
         fold_col: str
             The fold column name
     """
+
     scv_method: str = "No_Buffer"
     data: pd.DataFrame = field(default_factory=pd.DataFrame)
     fold_col: str = "FOLD_INDEX"

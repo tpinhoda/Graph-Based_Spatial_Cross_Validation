@@ -117,7 +117,7 @@ class UltraConservative(SpatialCV):
             # Clean data
             self._clean_data(cols_drop=[self.fold_col])
             # Save data
-            self._save_data()
+            # self._save_data()
             # Update cur dir
             self.cur_dir = os.path.join(self._get_root_path(), "folds", name_folds)
         # Save execution time
