@@ -1,0 +1,130 @@
+Optimistic
+atual máscara de afinidade do pid 27100: fff
+nova máscara de afinidade do pid 27100: ff
+atual máscara de afinidade do pid 27098: fff
+nova máscara de afinidade do pid 27098: ff
+atual máscara de afinidade do pid 27102: fff
+nova máscara de afinidade do pid 27102: ff
+atual máscara de afinidade do pid 27109: fff
+nova máscara de afinidade do pid 27109: ff
+atual máscara de afinidade do pid 27108: fff
+nova máscara de afinidade do pid 27108: ff
+atual máscara de afinidade do pid 27104: fff
+nova máscara de afinidade do pid 27104: ff
+atual máscara de afinidade do pid 27094: fff
+nova máscara de afinidade do pid 27094: ff
+atual máscara de afinidade do pid 27106: fff
+nova máscara de afinidade do pid 27106: ff
+atual máscara de afinidade do pid 27096: fff
+nova máscara de afinidade do pid 27096: ff
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+Unable to create WEKA_HOME (/home/tpinho/wekafiles)
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+Unable to create repository cache directory (/home/tpinho/wekafiles/repCache)
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+time -- -5.68397166666666e-05
+atual máscara de afinidade do pid 28229: fff
+nova máscara de afinidade do pid 28229: ff
+atual máscara de afinidade do pid 28221: fff
+nova máscara de afinidade do pid 28221: ff
+atual máscara de afinidade do pid 28223: fff
+nova máscara de afinidade do pid 28223: ff
+atual máscara de afinidade do pid 28225: fff
+nova máscara de afinidade do pid 28225: ff
+atual máscara de afinidade do pid 28219: fff
+nova máscara de afinidade do pid 28219: ff
+atual máscara de afinidade do pid 28227: fff
+nova máscara de afinidade do pid 28227: ff
+atual máscara de afinidade do pid 28232: fff
+nova máscara de afinidade do pid 28232: ff
+atual máscara de afinidade do pid 28217: fff
+nova máscara de afinidade do pid 28217: ff
+atual máscara de afinidade do pid 28231: fff
+nova máscara de afinidade do pid 28231: ff
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+DEBUG:weka.core.jvm:Adding bundled jars
+DEBUG:weka.core.jvm:Classpath=['/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/rhino-1.7R4.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/runnablequeue.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/javabridge/jars/cpython.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/weka.jar', '/home/tpinho/miniconda3/envs/RegGBSCV/lib/python3.9/site-packages/weka/lib/python-weka-wrapper.jar']
+DEBUG:weka.core.jvm:MaxHeapSize=default
+DEBUG:weka.core.jvm:Package support disabled
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first
+INFO:weka.core.jvm:JVM already running, call jvm.stop() first

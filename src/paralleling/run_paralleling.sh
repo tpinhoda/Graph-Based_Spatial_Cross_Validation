@@ -1,4 +1,24 @@
-echo -1
+echo Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.1 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.2 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.3 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.4 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.5 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.6 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.7 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.8 Optimistic
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.9 Optimistic
+echo Traditional
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.1 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.2 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.3 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.4 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.5 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.6 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.7 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.8 TraditionalSCV
+python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.9 TraditionalSCV
+echo 0.0
 python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.1 RegGBSCV_R_Kappa_0.0
 python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.2 RegGBSCV_R_Kappa_0.0
 python run_subprocess.py Brazil_Election_2018_Sampled_dec0.3_prob0.3 RegGBSCV_R_Kappa_0.0
