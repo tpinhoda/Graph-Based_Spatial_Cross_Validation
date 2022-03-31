@@ -1,8 +1,10 @@
 """Feature selection process"""
 import os
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
+from joblib import Parallel, delayed
+from pqdm.processes import pqdm
 import pandas as pd
 from tqdm import tqdm
 from weka.core import jvm
@@ -37,6 +39,7 @@ class FeatureSelection(Data):
     index_col: str = "INDEX"
     fold_col: str = "INDEX_FOLDS"
     target_col: str = "TARGET"
+    _data: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     def _target_as_last_col(self, data) -> pd.DataFrame:
         """Position the target column in the dataset last position"""
@@ -83,36 +86,37 @@ class FeatureSelection(Data):
             os.path.join(self.cur_dir, f"{fold}.json"), "w", encoding="utf-8"
         ) as file:
             json.dump(json_features, file, indent=4)
-
+    
+        
     def run(self):
         """Runs the feature selection per fold"""
-        data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
+        self._data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
         reorganized_cols = [
-            col for col in data.columns if col not in [self.target_col, self.fold_col]
+            col for col in self._data.columns if col not in [self.target_col, self.fold_col]
         ]
         reorganized_cols.append(self.target_col)
-        data = data[reorganized_cols]
+        self._data = self._data[reorganized_cols]
         try:
-            data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
+            self._data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
         except KeyError:
             pass
-        data.set_index(self.index_col, inplace=True)
+        self._data.set_index(self.index_col, inplace=True)
 
-        # if self.fs_method == "CFS":
-        #    self.logger_info("Starting JVM to execute Weka CFS.")
-        #    self.logger_warning("Some warnings may appear.")
-        #    jvm.start()
+        if self.fs_method == "CFS":
+            self.logger_info("Starting JVM to execute Weka CFS.")
+            self.logger_warning("Some warnings may appear.")
+            jvm.start()
         self._make_folders(
             ["results", self.scv_method, "features_selected", self.fs_method]
         )
         folds_path = os.path.join(self.root_path, "folds", self.scv_method)
         folds_name = self._get_folders_in_dir(folds_path)
-
+        
         for fold in tqdm(folds_name, desc="Selecting Features"):
             split_fold_idx = utils.load_json(
                 os.path.join(folds_path, fold, "split_data.json")
             )
-            training_data = data.loc[split_fold_idx["train"]].copy()
+            training_data = self._data.loc[split_fold_idx["train"]].copy()
             if self.fs_method == "CFS":
                 selected_features = self._weka_cfs(training_data)
             elif self.fs_method == "Pearson":
@@ -122,5 +126,5 @@ class FeatureSelection(Data):
             else:
                 continue
             self._save_selected_features(selected_features, fold)
-        # if self.fs_method == "CFS":
-        #    jvm.stop()
+        if self.fs_method == "CFS":
+            jvm.stop()

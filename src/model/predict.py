@@ -1,5 +1,6 @@
 """Predict data process"""
 import os
+import re
 from dataclasses import dataclass, field
 from typing import List
 import pickle
@@ -55,6 +56,10 @@ class Predict(Data):
     def load_model(filepath):
         """Load pickled models"""
         return pickle.load(open(filepath, "rb"))
+    
+    def _clean_train_data_col(self):
+        clean_cols = [re.sub(r"\W+", "", col) for col in self.test_data.columns]
+        self.test_data.columns = clean_cols
 
     def _split_data(self):
         """Split the data into explanatory and target features"""
@@ -64,6 +69,7 @@ class Predict(Data):
 
     def _predict(self, model):
         """make prediction"""
+        self._clean_train_data_col()
         x_test, _ = self._split_data()
         self.predictions = model.predict(x_test)
 
