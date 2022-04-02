@@ -8,6 +8,7 @@ from src.scv.gbscv import GraphBasedSCV
 from src.scv.reg_gbscv import RegGraphBasedSCV
 from src.scv.ultra_coservative import UltraConservative
 from src.scv.traditional_scv import TraditionalSCV
+from src.scv.cv import CrossValidation
 from src.feature_selection.fs import FeatureSelection
 from src.model.train import Train
 from src.model.predict import Predict
@@ -21,6 +22,7 @@ PIPELINE_MAP = {
         "SRBuffer": GraphBasedSCV,
         "Optimistic": Optimistic,
         "RegGBSCV": RegGraphBasedSCV,
+        "CrossValidation": CrossValidation
     },
     "fs": FeatureSelection,
     "train": Train,
