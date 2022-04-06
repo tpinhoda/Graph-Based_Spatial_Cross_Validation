@@ -30,35 +30,35 @@ ml_methods = ["KNN",
               "SVM"]
 
 
-def main(root_path, dataset, fs_method, index_col, index_fold, target_col):
+def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_method):
     """Runs main script"""
     utils.initialize_coloredlog()
     utils.initialize_rich_tracerback()
     utils.initialize_logging()
-    
+
     data_path = os.path.join(root_path, dataset, "data.csv")
     # Load data
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
     with contextlib.suppress(KeyError):
         data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
-    for ml_method in ml_methods:
-        # Run pipeline
-        TraditionalSCV = Pipeline(
-            root_path=os.path.join(root_path, dataset),
-            data=data,
-            meshblocks=None,
-            index_col=index_col,
-            fold_col=index_fold,
-            target_col=target_col,
-            scv_method="TraditionalSCV",
-            fs_method=fs_method,
-            ml_method=ml_method,
-            switchers=SWITCHERS
-        )
-
-        print(f"Running the Traditional SCV approach for dataset: {dataset} ML Method = {ml_method}")
-        TraditionalSCV.run()
     
+    # Run pipeline
+    TraditionalSCV = Pipeline(
+        root_path=os.path.join(root_path, dataset),
+        data=data,
+        meshblocks=None,
+        index_col=index_col,
+        fold_col=index_fold,
+        target_col=target_col,
+        scv_method="TraditionalSCV",
+        fs_method=fs_method,
+        ml_method=ml_method,
+        switchers=SWITCHERS
+    )
+
+    print(f"Running the Traditional SCV approach for dataset: {dataset} ML Method = {ml_method}")
+    TraditionalSCV.run()
+
 
 if __name__ == "__main__":
     root_path = sys.argv[1]
@@ -67,8 +67,8 @@ if __name__ == "__main__":
     index_col = sys.argv[4]
     fold_col = sys.argv[5]
     target_col = sys.argv[6]
-    print(dataset, fs_method, index_col, fold_col, target_col)
-    main(root_path, dataset, fs_method, index_col, fold_col, target_col)
+    ml_method = sys.argv[7]
+    main(root_path, dataset, fs_method, index_col, fold_col, target_col, ml_method)
     
     
     

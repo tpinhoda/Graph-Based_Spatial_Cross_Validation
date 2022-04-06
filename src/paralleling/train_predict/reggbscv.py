@@ -30,7 +30,7 @@ ml_methods = ["KNN",
               "SVM"]
 
 
-def main(root_path, dataset, fs_method, index_col, index_fold, target_col, kappa):
+def main(root_path, dataset, fs_method, index_col, index_fold, target_col, kappa, ml_method):
     """Runs main script"""
     utils.initialize_coloredlog()
     utils.initialize_rich_tracerback()
@@ -41,29 +41,27 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, kappa
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
     with contextlib.suppress(KeyError):
         data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
-    for ml_method in ml_methods:
-        # Run pipeline
-        pipeline = Pipeline(
-                root_path=os.path.join(root_path, dataset),
-                data=data,
-                adj_matrix=None,
-                w_matrix=None,
-                index_col=index_col,
-                fold_col=index_fold,
-                target_col=target_col,
-                scv_method="RegGBSCV",
-                type_graph="Weighted",
-                run_selection=False,
-                kappa=kappa,
-                fs_method=fs_method,
-                ml_method=ml_method,
-                paper=False,
-                switchers=SWITCHERS
-            )
+    pipeline = Pipeline(
+            root_path=os.path.join(root_path, dataset),
+            data=data,
+            adj_matrix=None,
+            w_matrix=None,
+            index_col=index_col,
+            fold_col=index_fold,
+            target_col=target_col,
+            scv_method="RegGBSCV",
+            type_graph="Weighted",
+            run_selection=False,
+            kappa=kappa,
+            fs_method=fs_method,
+            ml_method=ml_method,
+            paper=False,
+            switchers=SWITCHERS
+        )
 
-        print(f"Running the RegGBSCV SCV approach for dataset: {dataset} ML Method = {ml_method} Kappa = {kappa}")
-        pipeline.run()
-    
+    print(f"Running the RegGBSCV SCV approach for dataset: {dataset} ML Method = {ml_method} Kappa = {kappa}")
+    pipeline.run()
+
 
 if __name__ == "__main__":
     root_path = sys.argv[1]
@@ -73,8 +71,9 @@ if __name__ == "__main__":
     fold_col = sys.argv[5]
     target_col = sys.argv[6]
     kappa = sys.argv[7]
-    print(dataset, fs_method, index_col, fold_col, target_col)
-    main(root_path, dataset, fs_method, index_col, fold_col, target_col, kappa)
+    ml_method = sys.argv[8]
+
+    main(root_path, dataset, fs_method, index_col, fold_col, target_col, kappa, ml_method)
     
     
     

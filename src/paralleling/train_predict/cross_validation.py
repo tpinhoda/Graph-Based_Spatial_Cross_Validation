@@ -41,23 +41,23 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_me
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
     with contextlib.suppress(KeyError):
         data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
-        # Run pipeline
-    Optimistic = Pipeline(
+    # Run pipeline
+    CrossValidation = Pipeline(
         root_path=os.path.join(root_path, dataset),
         data=data,
         meshblocks=None,
         index_col=index_col,
         fold_col=index_fold,
         target_col=target_col,
-        scv_method="Optimistic",
+        scv_method="CrossValidation",
         fs_method=fs_method,
         ml_method=ml_method,
         switchers=SWITCHERS
     )
 
-    print(f"Running the Optimistic SCV approach for dataset: {dataset} ML Method = {ml_method}")
-    Optimistic.run()
-
+    print(f"Running the CrossValidation SCV approach for dataset: {dataset} ML Method = {ml_method}")
+    CrossValidation.run()
+    
 
 if __name__ == "__main__":
     root_path = sys.argv[1]
@@ -67,6 +67,7 @@ if __name__ == "__main__":
     fold_col = sys.argv[5]
     target_col = sys.argv[6]
     ml_method = sys.argv[7]
+    print(dataset, fs_method, index_col, fold_col, target_col)
     main(root_path, dataset, fs_method, index_col, fold_col, target_col, ml_method)
     
     
