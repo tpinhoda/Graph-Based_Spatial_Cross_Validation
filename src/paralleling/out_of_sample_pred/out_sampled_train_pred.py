@@ -11,6 +11,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import ElasticNet, Lasso, Ridge, LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.svm import SVR
+from tables import Column
 from weka.core import jvm
 from weka.attribute_selection import ASEvaluation, ASSearch, AttributeSelection
 from weka.core.dataset import create_instances_from_matrices
@@ -43,6 +44,9 @@ def _weka_cfs(data, target_col):
         jvm.stop()
         return data.columns.values[index_fs].tolist()
 
+def all_features(data, target_col):
+    return data.drop(target_col, axis=1).columns.values.tolist()
+
 
 def main(root_path, data_sampled_path, data_path, fs_method, index_col, fold_col, target_col):
     ml_methods = ["KNN", 
@@ -54,7 +58,8 @@ def main(root_path, data_sampled_path, data_path, fs_method, index_col, fold_col
               "LGBM", 
               "RF", 
               "MLP", 
-              "SVM"]
+              "SVM"
+              ]
     
     data_path = os.path.join(root_path, data_path, "data.csv")
     data_sampled_path = os.path.join(root_path, data_sampled_path)
@@ -65,7 +70,10 @@ def main(root_path, data_sampled_path, data_path, fs_method, index_col, fold_col
     
     out_sample = data.drop(index= data_sampled.index).copy()
     columns_fold = out_sample[fold_col]
-    features = _weka_cfs(data_sampled, target_col)
+    if fs_method == "CFS":
+        features = _weka_cfs(data_sampled, target_col)
+    elif fs_method == "All":
+        features = all_features(data_sampled, target_col)
     x = out_sample[features]
     y = out_sample[target_col]
     x.columns = [c.replace("[","") for c in x.columns]

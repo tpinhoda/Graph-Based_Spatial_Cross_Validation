@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 import pickle
+import joblib
 import pandas as pd
 from tqdm import tqdm
 from src.data import Data
@@ -55,7 +56,8 @@ class Predict(Data):
     @staticmethod
     def load_model(filepath):
         """Load pickled models"""
-        return pickle.load(open(filepath, "rb"))
+        #return pickle.load(open(filepath, "rb"))
+        return joblib.load(filepath)
     
     def _clean_train_data_col(self):
         clean_cols = [re.sub(r"\W+", "", col) for col in self.test_data.columns]

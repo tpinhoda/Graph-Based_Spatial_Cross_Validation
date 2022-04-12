@@ -4,6 +4,7 @@ import re
 import math
 from dataclasses import dataclass, field
 import pickle
+import joblib
 import lightgbm
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
@@ -122,7 +123,7 @@ class Train(Data):
 
     def save_model(self, model, fold):
         """Save the model using picke"""
-        pickle.dump(model, open(os.path.join(self.cur_dir, f"{fold}.pkl"), "wb"))
+        joblib.dump(model, open(os.path.join(self.cur_dir, f"{fold}.pkl"), "wb"), compress=9)
 
     def run(self):
         """Runs the training process per fold"""

@@ -62,31 +62,38 @@ if __name__ == "__main__":
                     "US_Corn_Yield_2016_Removed_WEST VIRGINIA",
                     "US_Corn_Yield_2016_Removed_WISCONSIN",
                     "US_Corn_Yield_2016_Removed_WYOMING"]
+    us_corn_datasets = ["US_Corn_Yield_2016_Removed_Northeast",
+                    "US_Corn_Yield_2016_Removed_Southeast",
+                    "US_Corn_Yield_2016_Removed_Midwest",
+                    "US_Corn_Yield_2016_Removed_Southwest",
+                    "US_Corn_Yield_2016_Removed_West"]
+
 
     #brazil_datasets = ["Brazil_Election_2018"]
-    
+     
+    single = ["US_Corn_Yield_2016_Removed_ALABAMA"]
     
     procs = []
     for dataset_name in us_corn_datasets:
         if val_method == "TraditionalSCV":
             cmd = f'python traditionalscv.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
             procs.append(
-                subprocess.Popen(cmd, shell=True)
+                subprocess.call(cmd, shell=True)
             )
         if val_method == "Optimistic":
             cmd = f'python optimistic.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
             procs.append(
-                subprocess.Popen(cmd, shell=True)
+                subprocess.call(cmd, shell=True)
             )
         if val_method == "RegGBSCV":
             cmd = f'python reggbscv.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {kappa} {ml_method}'
             procs.append(
-                subprocess.Popen(cmd, shell=True)
+                subprocess.call(cmd, shell=True)
             )
         if val_method == "CrossValidation":
             cmd = f'python cross_validation.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
             procs.append(
-                subprocess.Popen(cmd, shell=True)
+                subprocess.call(cmd, shell=True)
             )
     exit_codes = [p.wait() for p in procs]
     t1_stop = time.process_time()
