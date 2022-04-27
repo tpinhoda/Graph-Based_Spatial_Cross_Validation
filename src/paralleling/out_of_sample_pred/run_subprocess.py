@@ -8,8 +8,8 @@ from tqdm import tqdm
 if __name__ == "__main__":
     t1_start = time.process_time() 
     original_ds = "Original"
-    root_path = "/exp/tpinho/Datasets/US_Corn_Yield_2016"
-    fs_method = "All"
+    root_path = "/home/tpinho/IJGIS/Datasets/Australia_Election_2019"
+    fs_method = "CFS"
     index_col = "INDEX"
     target_col = "TARGET"
     fold_col = "INDEX_FOLDS"
@@ -65,10 +65,20 @@ if __name__ == "__main__":
                     "US_Corn_Yield_2016_Removed_Midwest",
                     "US_Corn_Yield_2016_Removed_Southwest",
                     "US_Corn_Yield_2016_Removed_West"]
+    
+    australia_datasets = ["Australia_Election_2019_Sampled_dec0.05_prob0.1",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.2",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.3",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.4",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.5",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.6",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.7",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.8",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.9"]
 
     
     procs = []
-    for dataset_name in tqdm(us_corn_datasets):
+    for dataset_name in tqdm(australia_datasets):
         cmd = f'python out_sampled_train_pred.py {root_path} "{dataset_name}" {original_ds} {fs_method} {index_col} {fold_col} {target_col}'
         procs.append(
             subprocess.call(cmd, shell=True)

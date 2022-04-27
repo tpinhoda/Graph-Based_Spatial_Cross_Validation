@@ -7,8 +7,7 @@ import argparse
 
 if __name__ == "__main__":
     t1_start = time.process_time() 
-    #root_path = "/home/tpinho/IJGIS/Datasets/Brazil_Election_2018"
-    root_path = "/exp/tpinho/Datasets/Australia_Election_2019"
+    root_path = "/home/tpinho/IJGIS/Datasets/Australia_Election_2019"
     #val_method = sys.argv[2]
     #dataset_names = [sys.argv[1]]
     #fold_arg = [sys.argv[3]]
@@ -32,10 +31,10 @@ if __name__ == "__main__":
     default=[],
     )
     CLI.add_argument(
-    "--list_contexts",  # name on the CLI - drop the `--` for positional/required parameters
+    "--fs_method",  # name on the CLI - drop the `--` for positional/required parameters
     nargs="*",  # 0 or more values expected => creates a list
     type=int,
-    default=[],  # default if nothing is provided
+    default="CFS",  # default if nothing is provided
     )
     
     
@@ -43,14 +42,6 @@ if __name__ == "__main__":
     index_col = "INDEX"
     target_col = "TARGET"
     fold_col = "INDEX_FOLDS"
-    #folds = [51]
-    #folds = [11, 12, 13, 14, 15, 16, 17, 21, 22]
-    folds = [11, 12, 13, 14, 15]
-    #folds = [23, 24, 25, 26, 27, 28, 29, 31, 32]
-    #folds = [33, 35, 41, 42, 43, 50, 51, 52, 53]
-    #folds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    #folds = [11, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 35, 41, 42, 43, 50, 51, 52, 53]
-    #folds = [11, 12, 13]
     procs = []
     args = CLI.parse_args()
     print(args.dataset_names)
@@ -59,7 +50,8 @@ if __name__ == "__main__":
         for fold in args.folds:
             for context in args.list_contexts:
                 if context != int(fold):
-                    cmd = f"python fs_cfs.py {args.val_method[0]} {root_path} {dataset_name} {fold} {index_col} {target_col} {fold_col}"
+                    cmd = f'python optimistic.py {root_path} "{dataset_name}" {args.fs_method[0]} {index_col} {fold_col} {target_col} {args.val_method[0]}'
+                    cmd = f"python fs_cfs_local.py {args.val_method[0]} {root_path} {dataset_name} {fold} {index_col} {target_col} {fold_col} {context}"
                     procs.append(
                         subprocess.Popen(cmd, shell=True)
                     )

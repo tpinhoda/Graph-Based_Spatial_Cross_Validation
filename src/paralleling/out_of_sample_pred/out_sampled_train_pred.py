@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import ElasticNet, Lasso, Ridge, LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.svm import SVR
-from tables import Column
+#from tables import Column
 from weka.core import jvm
 from weka.attribute_selection import ASEvaluation, ASSearch, AttributeSelection
 from weka.core.dataset import create_instances_from_matrices
@@ -20,7 +20,7 @@ from weka.core.dataset import create_instances_from_matrices
 def _target_as_last_col(data, target_col) -> pd.DataFrame:
         """Position the target column in the dataset last position"""
         cols = [c for c in data.columns if c != target_col]
-        return data[cols + [target_col]]
+        return data[cols[:4000] + [target_col]]
     
 def _weka_cfs(data, target_col):
         """Runs the CFS method from WEKA"""
@@ -64,10 +64,25 @@ def main(root_path, data_sampled_path, data_path, fs_method, index_col, fold_col
     data_path = os.path.join(root_path, data_path, "data.csv")
     data_sampled_path = os.path.join(root_path, data_sampled_path)
     data = pd.read_csv(data_path, index_col=index_col)
+    try:
+        data.drop(columns=["[GEO]_DIVISIONNM"], inplace=True)
+    except KeyError:
+        pass
+    try:
+        data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
+    except KeyError:
+        pass
     data_sampled = pd.read_csv(os.path.join(data_sampled_path, "data.csv"), index_col=index_col)
     data_sampled.index = data_sampled.index.astype(data.index.dtype)
     data_sampled.drop(columns=[fold_col],inplace=True)
-    
+    try:
+        data_sampled.drop(columns=["[GEO]_DIVISIONNM"], inplace=True)
+    except KeyError:
+        pass
+    try:
+        data_sampled.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
+    except KeyError:
+        pass    
     out_sample = data.drop(index= data_sampled.index).copy()
     columns_fold = out_sample[fold_col]
     if fs_method == "CFS":

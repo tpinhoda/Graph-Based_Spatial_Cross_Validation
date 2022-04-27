@@ -90,7 +90,7 @@ class FeatureSelection(Data):
         """Runs the feature selection per fold"""
         self._data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
         reorganized_cols = [
-            col for col in self._data.columns if col not in [self.target_col, self.fold_col]
+            col for col in self._data.columns if col not in [self.target_col]
         ]
         reorganized_cols.append(self.target_col)
         self._data = self._data[reorganized_cols]
@@ -109,20 +109,42 @@ class FeatureSelection(Data):
         )
         folds_path = os.path.join(self.root_path, "folds", self.scv_method)
         folds_name = self._get_folders_in_dir(folds_path)
-        
-        for fold in tqdm(folds_name, desc="Selecting Features"):
-            split_fold_idx = utils.load_json(
-                os.path.join(folds_path, fold, "split_data.json")
-            )
-            training_data = self._data.loc[split_fold_idx["train"]].copy()
-            if self.fs_method == "CFS":
-                selected_features = self._weka_cfs(training_data)
-            elif self.fs_method == "Pearson":
-                selected_features = self._cor_fs(training_data)
-            elif self.fs_method == "All":
-                selected_features = self._all_fs(training_data)
-            else:
-                continue
-            self._save_selected_features(selected_features, fold)
+        if "Local" not in self.fs_method:
+            for fold in tqdm(folds_name, desc="Selecting Features"):
+                split_fold_idx = utils.load_json(
+                    os.path.join(folds_path, fold, "split_data.json")
+                )
+                training_data = self._data.loc[split_fold_idx["train"]].copy()
+                if self.fs_method == "CFS":
+                    selected_features = self._weka_cfs(training_data)
+                elif self.fs_method == "Pearson":
+                    selected_features = self._cor_fs(training_data)
+                elif self.fs_method == "All":
+                    selected_features = self._all_fs(training_data)
+                else:
+                    continue
+                self._save_selected_features(selected_features, fold)
+        else:
+            for fold in folds_name:
+                split_fold_idx = utils.load_json(
+                    os.path.join(folds_path, fold, "split_data.json")
+                )
+                training_data = self._data.loc[split_fold_idx["train"]].copy()
+                parent_dir = self.cur_dir
+                self._mkdir(fold)
+                for context_id, context_data in tqdm(training_data.groupby(self.fold_col), desc="Selecting Features"):
+                    context_data.drop([self.fold_col], axis=1)
+                    print(context_id)
+                    if "CFS" in self.fs_method:
+                        selected_features = self._weka_cfs(context_data)
+                    elif "Pearson" in self.fs_method:
+                        selected_features = self._cor_fs(context_data)
+                    elif "All" in self.fs_method:
+                        selected_features = self._all_fs(context_data)
+                    else:
+                        continue
+                    self._save_selected_features(selected_features, context_id)
+                self.cur_dir = parent_dir
+                
         if self.fs_method == "CFS":
             jvm.stop()

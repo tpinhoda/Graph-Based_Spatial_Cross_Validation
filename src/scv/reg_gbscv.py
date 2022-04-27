@@ -56,6 +56,7 @@ class RegGraphBasedSCV(SpatialCV):
     def _calculate_train_pca(self) -> np.array:
         """Return the PCA first component transformation on the traind data"""
         pca = PCA(n_components=1)
+        
         train = self.data.drop(columns=[self.fold_col, self.target_col])
         # For the IMCLA21 paper the PCA is executed only on the cennsus columns
         if self.paper:

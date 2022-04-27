@@ -11,8 +11,8 @@ if __name__ == "__main__":
     val_method = sys.argv[1]
     kappa = sys.argv[2]
     ml_method = sys.argv[3]
-    root_path = "/exp/tpinho/Datasets/US_Corn_Yield_2016"
-    fs_method = "All"
+    root_path = "/home/tpinho/IJGIS/Datasets/Australia_Election_2019"
+    fs_method = "CFS"
     index_col = "INDEX"
     target_col = "TARGET"
     fold_col = "INDEX_FOLDS"
@@ -67,6 +67,16 @@ if __name__ == "__main__":
                     "US_Corn_Yield_2016_Removed_Midwest",
                     "US_Corn_Yield_2016_Removed_Southwest",
                     "US_Corn_Yield_2016_Removed_West"]
+    
+    australia_datasets = ["Australia_Election_2019_Sampled_dec0.05_prob0.1",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.2",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.3",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.4",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.5",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.6",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.7",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.8",
+                "Australia_Election_2019_Sampled_dec0.05_prob0.9"]
 
 
     #brazil_datasets = ["Brazil_Election_2018"]
@@ -74,26 +84,26 @@ if __name__ == "__main__":
     single = ["US_Corn_Yield_2016_Removed_ALABAMA"]
     
     procs = []
-    for dataset_name in us_corn_datasets:
+    for dataset_name in australia_datasets:
         if val_method == "TraditionalSCV":
             cmd = f'python traditionalscv.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
             procs.append(
-                subprocess.call(cmd, shell=True)
+                subprocess.Popen(cmd, shell=True)
             )
         if val_method == "Optimistic":
             cmd = f'python optimistic.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
             procs.append(
-                subprocess.call(cmd, shell=True)
+                subprocess.Popen(cmd, shell=True)
             )
         if val_method == "RegGBSCV":
             cmd = f'python reggbscv.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {kappa} {ml_method}'
             procs.append(
-                subprocess.call(cmd, shell=True)
+                subprocess.Popen(cmd, shell=True)
             )
         if val_method == "CrossValidation":
             cmd = f'python cross_validation.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
             procs.append(
-                subprocess.call(cmd, shell=True)
+                subprocess.Popen(cmd, shell=True)
             )
     exit_codes = [p.wait() for p in procs]
     t1_stop = time.process_time()

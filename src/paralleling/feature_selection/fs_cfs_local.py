@@ -7,6 +7,7 @@ import os
 import time
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 from weka.core import jvm
 from weka.attribute_selection import ASEvaluation, ASSearch, AttributeSelection
 from weka.core.dataset import create_instances_from_matrices
@@ -59,15 +60,13 @@ def read_data(root_path, dataset_name, index_col, target_col, fold_col):
     """read data"""
     dataset = pd.read_csv(join(root_path, dataset_name, "data.csv"))
     reorganized_cols = [
-        col for col in dataset.columns if col not in [target_col, fold_col]
+        col for col in dataset.columns if col not in [target_col]
     ]
     reorganized_cols = reorganized_cols[:4000]
     reorganized_cols.append(target_col)
     dataset = dataset[reorganized_cols]
     with contextlib.suppress(KeyError):
         dataset.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
-    with contextlib.suppress(KeyError):
-        dataset.drop(columns=["[GEO]_DIVISIONNM"], inplace=True)
     dataset.set_index(index_col, inplace=True)
     return dataset
 
@@ -79,19 +78,21 @@ def _save_selected_features(output_path ,features, fold):
     ) as file:
         json.dump(json_features, file, indent=4)
 
-def main(dataset_name, val_method,root_path, fold, index_col, target_col, fold_col):
+def main(dataset_name, val_method,root_path, fold, index_col, target_col, fold_col, context_fold):
     data = read_data(root_path, dataset_name, index_col, target_col, fold_col)
-    output_path = _make_folders(join(root_path, dataset_name), ["results", val_method ,"features_selected", "CFS"])
+    output_path = _make_folders(join(root_path, dataset_name), ["results", val_method ,"features_selected", "CFS_Local"])
     folds_path = join(root_path, dataset_name, "folds", val_method)
     
     split_fold_idx = utils.load_json(join(folds_path, fold, "split_data.json"))
     training_data = data.loc[split_fold_idx["train"]].copy()
-    
+    context_data = training_data[training_data[fold_col]==int(context_fold)]
     jvm.start()
-    selected_features = _weka_cfs(training_data, target_col)
-    _save_selected_features(output_path, selected_features, fold)
+    context_data.drop([fold_col], axis=1)
+    out_path = _make_folders(output_path, [fold])
+    selected_features = _weka_cfs(context_data, target_col)
+    _save_selected_features(out_path, selected_features, context_fold)
     jvm.stop()
-    
+
 if __name__ == "__main__":
-    val_method, root_path, dataset_name, fold, index_col, target_col, fold_col = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7]
-    main(dataset_name, val_method, root_path, fold, index_col, target_col, fold_col)
+    val_method, root_path, dataset_name, fold, index_col, target_col, fold_col, context_fold = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8]
+    main(dataset_name, val_method, root_path, fold, index_col, target_col, fold_col, context_fold)
