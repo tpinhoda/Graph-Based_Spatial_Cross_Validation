@@ -37,11 +37,15 @@ class FeatureSelection(Data):
     index_col: str = "INDEX"
     fold_col: str = "INDEX_FOLDS"
     target_col: str = "TARGET"
+    cols_remove: List =  field(default_factory=list)
     _data: pd.DataFrame = field(default_factory=pd.DataFrame)
 
-    def _target_as_last_col(self, data) -> pd.DataFrame:
+    def _reorganize_cols(self, data) -> pd.DataFrame:
         """Position the target column in the dataset last position"""
+        if self.cols_remove:
+            data.drop(columns=self.cols_remove)
         cols = [c for c in data.columns if c != self.target_col]
+        
         return data[cols + [self.target_col]]
 
     def _cor_fs(self, data) -> List:
@@ -59,7 +63,6 @@ class FeatureSelection(Data):
 
     def _weka_cfs(self, data) -> List:
         """Runs the CFS method from WEKA"""
-        data = self._target_as_last_col(data)
         data_weka = create_instances_from_matrices(data.to_numpy())
         data_weka.class_is_last()
         search = ASSearch(
@@ -88,16 +91,8 @@ class FeatureSelection(Data):
     def run(self):
         """Runs the feature selection per fold"""
         self._data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
-        reorganized_cols = [
-            col for col in self._data.columns if col not in [self.target_col]
-        ]
-        reorganized_cols.append(self.target_col)
-        self._data = self._data[reorganized_cols]
-        try:
-            self._data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
-        except KeyError:
-            pass
         self._data.set_index(self.index_col, inplace=True)
+        self._data = self._reorganize_cols(self._data)
 
         self._make_folders(
             ["results", self.scv_method, "features_selected", self.fs_method]
@@ -105,28 +100,20 @@ class FeatureSelection(Data):
         folds_path = os.path.join(self.root_path, "folds", self.scv_method)
         folds_name = self._get_folders_in_dir(folds_path)
       
-        for fold in folds_name:
+        for fold in tqdm(folds_name, desc="Selecting Features"):
             split_fold_idx = utils.load_json(
                 os.path.join(folds_path, fold, "split_data.json")
             )
             training_data = self._data.loc[split_fold_idx["train"]].copy()
-            parent_dir = self.cur_dir
-            self._mkdir(fold)
-            for context_id, context_data in tqdm(
-                training_data.groupby(self.fold_col), desc="Selecting Features"
-            ):
-                context_data.drop([self.fold_col], axis=1)
-                print(context_id)
-                if "CFS" in self.fs_method:
-                    selected_features = self._weka_cfs(context_data)
-                elif "Pearson" in self.fs_method:
-                    selected_features = self._cor_fs(context_data)
-                elif "All" in self.fs_method:
-                    selected_features = self._all_fs(context_data)
-                else:
-                    continue
-                self._save_selected_features(selected_features, context_id)
-            self.cur_dir = parent_dir
+            if self.fs_method == "CFS":
+                selected_features = self._weka_cfs(training_data)
+            elif self.fs_method == "Pearson":
+                selected_features = self._cor_fs(training_data)
+            elif self.fs_method == "All":
+                selected_features = self._all_fs(training_data)
+            else:
+                continue
+            self._save_selected_features(selected_features, fold)
 
         if self.fs_method == "CFS":
             jvm.stop()

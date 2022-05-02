@@ -1,5 +1,6 @@
 """Pipeline to analyse electoral data"""
 from dataclasses import dataclass, field
+from re import L
 from typing import Dict, List, Optional
 import inspect
 import pandas as pd
@@ -86,6 +87,7 @@ class Pipeline:
     type_graph: str = None
     switchers: Dict[str, str] = field(default_factory=dict)
     pipeline: List[str] = field(default_factory=list)
+    cols_remove: List[str] = field(default_factory=list)
 
     @staticmethod
     def _get_class_attributes(class_process):
@@ -120,6 +122,7 @@ class Pipeline:
             "paper": self.paper,
             "fast": self.fast,
             "type_graph": self.type_graph,
+            "cols_remove": self.cols_remove
         }
         if params["scv_method"] == "RegGBSCV":
             if params["run_selection"]:
