@@ -128,13 +128,7 @@ class Evaluate(Data):
     def run(self):
         """Runs the predicting process per fold"""
         self._make_folders(
-            [
-                "results",
-                self.scv_method,
-                "evaluations",
-                self.fs_method,
-                self.ml_method,
-            ]
+            ["results", self.scv_method, "evaluations", self.fs_method, self.ml_method,]
         )
         folds_path = os.path.join(self.root_path, "folds", self.scv_method)
         results_path = os.path.join(self.root_path, "results", self.scv_method)

@@ -23,7 +23,9 @@ class CrossValidation(SpatialCV):
         root_path : str
             Root path
     """
+
     k: int = 10
+
     def run(self) -> None:
         """Generate merged data"""
         # Create folder folds

@@ -22,7 +22,7 @@ PIPELINE_MAP = {
         "SRBuffer": GraphBasedSCV,
         "Optimistic": Optimistic,
         "RegGBSCV": RegGraphBasedSCV,
-        "CrossValidation": CrossValidation
+        "CrossValidation": CrossValidation,
     },
     "fs": FeatureSelection,
     "train": Train,

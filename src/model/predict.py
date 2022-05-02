@@ -3,7 +3,6 @@ import os
 import re
 from dataclasses import dataclass, field
 from typing import List
-import pickle
 import joblib
 import pandas as pd
 from tqdm import tqdm
@@ -56,9 +55,9 @@ class Predict(Data):
     @staticmethod
     def load_model(filepath):
         """Load pickled models"""
-        #return pickle.load(open(filepath, "rb"))
+        # return pickle.load(open(filepath, "rb"))
         return joblib.load(filepath)
-    
+
     def _clean_train_data_col(self):
         clean_cols = [re.sub(r"\W+", "", col) for col in self.test_data.columns]
         self.test_data.columns = clean_cols
@@ -74,6 +73,7 @@ class Predict(Data):
         self._clean_train_data_col()
         x_test, _ = self._split_data()
         self.predictions = model.predict(x_test)
+        return self.predictions
 
     def save_prediction(self, fold):
         """Save the model's prediction"""
@@ -87,13 +87,7 @@ class Predict(Data):
         data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
         data.set_index(self.index_col, inplace=True)
         self._make_folders(
-            [
-                "results",
-                self.scv_method,
-                "predictions",
-                self.fs_method,
-                self.ml_method,
-            ]
+            ["results", self.scv_method, "predictions", self.fs_method, self.ml_method,]
         )
         folds_path = os.path.join(self.root_path, "folds", self.scv_method)
         results_path = os.path.join(self.root_path, "results", self.scv_method)

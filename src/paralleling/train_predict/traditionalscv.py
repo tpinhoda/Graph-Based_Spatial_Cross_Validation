@@ -18,16 +18,18 @@ SWITCHERS = {
     "evaluate": False,
 }
 
-ml_methods = ["KNN", 
-              "OLS", 
-              "Lasso", 
-              "Ridge", 
-              "ElasticNet", 
-              "DT", 
-              "LGBM", 
-              "RF", 
-              "MLP", 
-              "SVM"]
+ml_methods = [
+    "KNN",
+    "OLS",
+    "Lasso",
+    "Ridge",
+    "ElasticNet",
+    "DT",
+    "LGBM",
+    "RF",
+    "MLP",
+    "SVM",
+]
 
 
 def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_method):
@@ -41,7 +43,7 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_me
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
     with contextlib.suppress(KeyError):
         data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
-    
+
     # Run pipeline
     TraditionalSCV = Pipeline(
         root_path=os.path.join(root_path, dataset),
@@ -53,10 +55,12 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_me
         scv_method="TraditionalSCV",
         fs_method=fs_method,
         ml_method=ml_method,
-        switchers=SWITCHERS
+        switchers=SWITCHERS,
     )
 
-    print(f"Running the Traditional SCV approach for dataset: {dataset} ML Method = {ml_method}")
+    print(
+        f"Running the Traditional SCV approach for dataset: {dataset} ML Method = {ml_method}"
+    )
     TraditionalSCV.run()
 
 
@@ -69,7 +73,3 @@ if __name__ == "__main__":
     target_col = sys.argv[6]
     ml_method = sys.argv[7]
     main(root_path, dataset, fs_method, index_col, fold_col, target_col, ml_method)
-    
-    
-    
-    

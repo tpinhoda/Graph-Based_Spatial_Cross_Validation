@@ -28,7 +28,7 @@ def initialize_rich_tracerback():
 def load_env_variables(project_dir) -> Dict[str, str]:
     """Loads enviromental variables in the .env file."""
     dotenv_path = os.path.join(project_dir, ".env")
-    load_dotenv(dotenv_path)
+    load_dotenv(dotenv_path, override=True)
     return {
         "root_path": os.environ.get("ROOT_DATA"),
         "census_filepath": os.environ.get("CENSUS_FILEPATH"),

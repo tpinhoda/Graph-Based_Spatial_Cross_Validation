@@ -3,6 +3,7 @@ import os
 import re
 import math
 from dataclasses import dataclass, field
+import pickle
 import joblib
 import lightgbm
 from sklearn.tree import DecisionTreeRegressor
@@ -153,7 +154,22 @@ class Train(Data):
         for fold in tqdm(folds_name, desc="Training model"):
             params = {}
             self._read_train_data(os.path.join(folds_path, fold), data)
-            self._selected_features_filtering(os.path.join(fs_path, f"{fold}.json"))
-            model = self._get_model(params=params)
-            model = self._fit(model)
-            self.save_model(model, fold)
+            original_train = self.train_data
+            if "Local" in self.fs_method:
+                context_list = self._get_files_in_dir(os.path.join(fs_path, fold))
+                for context in context_list:
+                    self.train_data = original_train
+                    self._selected_features_filtering(
+                        os.path.join(fs_path, fold, context)
+                    )
+                    model = self._get_model(params=params)
+                    model = self._fit(model)
+                    ml_path = self.cur_dir
+                    self._mkdir(fold)
+                    self.save_model(model, context.split(".")[0])
+                    self.cur_dir = ml_path
+            else:
+                self._selected_features_filtering(os.path.join(fs_path, f"{fold}.json"))
+                model = self._get_model(params=params)
+                model = self._fit(model)
+                self.save_model(model, fold)

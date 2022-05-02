@@ -56,7 +56,7 @@ class VizDependence(Data):
     def _read_train_data(self, json_path, data):
         """Read the training data"""
         split_fold_idx = utils.load_json(os.path.join(json_path, "split_data.json"))
-        self._train = data.loc[ split_fold_idx["train"]].copy()
+        self._train = data.loc[split_fold_idx["train"]].copy()
 
     # def _read_train_data(self, folds_path, fold, paper):
     #    """Read train data"""

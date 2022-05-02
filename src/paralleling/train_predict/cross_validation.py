@@ -18,16 +18,18 @@ SWITCHERS = {
     "evaluate": False,
 }
 
-ml_methods = ["KNN", 
-              "OLS", 
-              "Lasso", 
-              "Ridge", 
-              "ElasticNet", 
-              "DT", 
-              "LGBM", 
-              "RF", 
-              "MLP", 
-              "SVM"]
+ml_methods = [
+    "KNN",
+    "OLS",
+    "Lasso",
+    "Ridge",
+    "ElasticNet",
+    "DT",
+    "LGBM",
+    "RF",
+    "MLP",
+    "SVM",
+]
 
 
 def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_method):
@@ -35,7 +37,7 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_me
     utils.initialize_coloredlog()
     utils.initialize_rich_tracerback()
     utils.initialize_logging()
-    
+
     data_path = os.path.join(root_path, dataset, "data.csv")
     # Load data
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
@@ -52,12 +54,14 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_me
         scv_method="CrossValidation",
         fs_method=fs_method,
         ml_method=ml_method,
-        switchers=SWITCHERS
+        switchers=SWITCHERS,
     )
 
-    print(f"Running the CrossValidation SCV approach for dataset: {dataset} ML Method = {ml_method}")
+    print(
+        f"Running the CrossValidation SCV approach for dataset: {dataset} ML Method = {ml_method}"
+    )
     CrossValidation.run()
-    
+
 
 if __name__ == "__main__":
     root_path = sys.argv[1]
@@ -69,7 +73,3 @@ if __name__ == "__main__":
     ml_method = sys.argv[7]
     print(dataset, fs_method, index_col, fold_col, target_col)
     main(root_path, dataset, fs_method, index_col, fold_col, target_col, ml_method)
-    
-    
-    
-    

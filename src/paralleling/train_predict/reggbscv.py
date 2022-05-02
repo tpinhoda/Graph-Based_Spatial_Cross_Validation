@@ -18,48 +18,54 @@ SWITCHERS = {
     "evaluate": False,
 }
 
-ml_methods = ["KNN", 
-              "OLS", 
-              "Lasso", 
-              "Ridge", 
-              "ElasticNet", 
-              "DT", 
-              "LGBM", 
-              "RF", 
-              "MLP", 
-              "SVM"]
+ml_methods = [
+    "KNN",
+    "OLS",
+    "Lasso",
+    "Ridge",
+    "ElasticNet",
+    "DT",
+    "LGBM",
+    "RF",
+    "MLP",
+    "SVM",
+]
 
 
-def main(root_path, dataset, fs_method, index_col, index_fold, target_col, kappa, ml_method):
+def main(
+    root_path, dataset, fs_method, index_col, index_fold, target_col, kappa, ml_method
+):
     """Runs main script"""
     utils.initialize_coloredlog()
     utils.initialize_rich_tracerback()
     utils.initialize_logging()
-    
+
     data_path = os.path.join(root_path, dataset, "data.csv")
     # Load data
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
     with contextlib.suppress(KeyError):
         data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
     pipeline = Pipeline(
-            root_path=os.path.join(root_path, dataset),
-            data=data,
-            adj_matrix=None,
-            w_matrix=None,
-            index_col=index_col,
-            fold_col=index_fold,
-            target_col=target_col,
-            scv_method="RegGBSCV",
-            type_graph="Weighted",
-            run_selection=False,
-            kappa=kappa,
-            fs_method=fs_method,
-            ml_method=ml_method,
-            paper=False,
-            switchers=SWITCHERS
-        )
+        root_path=os.path.join(root_path, dataset),
+        data=data,
+        adj_matrix=None,
+        w_matrix=None,
+        index_col=index_col,
+        fold_col=index_fold,
+        target_col=target_col,
+        scv_method="RegGBSCV",
+        type_graph="Weighted",
+        run_selection=False,
+        kappa=kappa,
+        fs_method=fs_method,
+        ml_method=ml_method,
+        paper=False,
+        switchers=SWITCHERS,
+    )
 
-    print(f"Running the RegGBSCV SCV approach for dataset: {dataset} ML Method = {ml_method} Kappa = {kappa}")
+    print(
+        f"Running the RegGBSCV SCV approach for dataset: {dataset} ML Method = {ml_method} Kappa = {kappa}"
+    )
     pipeline.run()
 
 
@@ -73,8 +79,6 @@ if __name__ == "__main__":
     kappa = sys.argv[7]
     ml_method = sys.argv[8]
 
-    main(root_path, dataset, fs_method, index_col, fold_col, target_col, kappa, ml_method)
-    
-    
-    
-    
+    main(
+        root_path, dataset, fs_method, index_col, fold_col, target_col, kappa, ml_method
+    )
