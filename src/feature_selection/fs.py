@@ -58,7 +58,7 @@ class FeatureSelection(Data):
 
     def _all_fs(self, data) -> List:
         """Select all data"""
-        data.drop(columns=[self.target_col], inplace=True)
+        data.drop(columns=[self.target_col, self.fold_col], inplace=True)
         return data.columns.values.tolist()
 
     def _weka_cfs(self, data) -> List:

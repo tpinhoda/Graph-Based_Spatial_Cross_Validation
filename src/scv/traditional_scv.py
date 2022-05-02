@@ -86,6 +86,9 @@ class TraditionalSCV(SpatialCV):
 
     def _generate_x_y(self):
         self.meshblocks.index = self.meshblocks.index.astype(self.data.index.dtype)
+
+        if not self.meshblocks.crs:
+            self.meshblocks = self.meshblocks.set_crs(4326, allow_override=True)
         self.meshblocks["x"] = (
             self.meshblocks.to_crs("+proj=cea")
             .centroid.to_crs(self.meshblocks.crs)
