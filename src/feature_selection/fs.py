@@ -43,7 +43,7 @@ class FeatureSelection(Data):
     def _reorganize_cols(self, data) -> pd.DataFrame:
         """Position the target column in the dataset last position"""
         if self.cols_remove:
-            data.drop(columns=self.cols_remove)
+            data.drop(columns=self.cols_remove, inplace=True)
         cols = [c for c in data.columns if c != self.target_col]
         
         return data[cols + [self.target_col]]
