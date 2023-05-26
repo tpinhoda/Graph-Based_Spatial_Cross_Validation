@@ -40,7 +40,7 @@ def _weka_cfs(data, target_col):
     attsel.search(search)
     attsel.evaluator(evaluator)
     attsel.select_attributes(data_weka)
-    index_fs = [i - 1 for i in attsel.selected_attributes]
+    index_fs = [i for i in attsel.selected_attributes]
     jvm.stop()
     return data.columns.values[index_fs].tolist()
 
@@ -93,6 +93,7 @@ def main(
     columns_fold = out_sample[fold_col]
     if fs_method == "CFS":
         features = _weka_cfs(data_sampled, target_col)
+        features.remove(target_col)
     elif fs_method == "All":
         features = all_features(data_sampled, target_col)
     x = out_sample[features]

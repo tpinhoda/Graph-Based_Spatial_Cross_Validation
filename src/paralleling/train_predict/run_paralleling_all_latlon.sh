@@ -1,0 +1,43 @@
+python run_subprocess.py CrossValidation 0.0 KNN LatLon
+python run_subprocess.py CrossValidation 0.0 OLS LatLon
+python run_subprocess.py CrossValidation 0.0 Lasso LatLon
+python run_subprocess.py CrossValidation 0.0 Ridge LatLon
+python run_subprocess.py CrossValidation 0.0 ElasticNet LatLon
+python run_subprocess.py CrossValidation 0.0 DT LatLon
+python run_subprocess.py CrossValidation 0.0 LGBM LatLon
+python run_subprocess.py CrossValidation 0.0 RF LatLon
+python run_subprocess.py CrossValidation 0.0 MLP LatLon
+python run_subprocess.py CrossValidation 0.0 SVM LatLon
+echo 1
+python run_subprocess.py TraditionalSCV 0.0 KNN LatLon
+python run_subprocess.py TraditionalSCV 0.0 OLS LatLon
+python run_subprocess.py TraditionalSCV 0.0 Lasso LatLon
+python run_subprocess.py TraditionalSCV 0.0 Ridge LatLon
+python run_subprocess.py TraditionalSCV 0.0 ElasticNet LatLon
+python run_subprocess.py TraditionalSCV 0.0 DT LatLon
+python run_subprocess.py TraditionalSCV 0.0 LGBM LatLon
+python run_subprocess.py TraditionalSCV 0.0 RF LatLon
+python run_subprocess.py TraditionalSCV 0.0 MLP LatLon
+python run_subprocess.py TraditionalSCV 0.0 SVM LatLon
+echo Optimistic
+python run_subprocess.py Optimistic 0.0 KNN LatLon
+python run_subprocess.py Optimistic 0.0 OLS LatLon
+python run_subprocess.py Optimistic 0.0 Lasso LatLon
+python run_subprocess.py Optimistic 0.0 Ridge LatLon
+python run_subprocess.py Optimistic 0.0 ElasticNet LatLon
+python run_subprocess.py Optimistic 0.0 DT LatLon
+python run_subprocess.py Optimistic 0.0 LGBM LatLon
+python run_subprocess.py Optimistic 0.0 RF LatLon
+python run_subprocess.py Optimistic 0.0 MLP LatLon
+python run_subprocess.py Optimistic 0.0 SVM LatLon
+echo RegGBSCV
+python run_subprocess.py RegGBSCV 0.0 KNN LatLon
+python run_subprocess.py RegGBSCV 0.0 OLS LatLon
+python run_subprocess.py RegGBSCV 0.0 Lasso LatLon
+python run_subprocess.py RegGBSCV 0.0 Ridge LatLon
+python run_subprocess.py RegGBSCV 0.0 ElasticNet LatLon
+python run_subprocess.py RegGBSCV 0.0 DT LatLon
+python run_subprocess.py RegGBSCV 0.0 LGBM LatLon
+python run_subprocess.py RegGBSCV 0.0 RF LatLon
+python run_subprocess.py RegGBSCV 0.0 MLP LatLon
+python run_subprocess.py RegGBSCV 0.0 SVM LatLon

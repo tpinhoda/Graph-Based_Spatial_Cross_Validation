@@ -1,0 +1,10 @@
+python run_subprocess.py RegGBSCV 3.0 KNN CFS
+python run_subprocess.py RegGBSCV 3.0 OLS CFS
+python run_subprocess.py RegGBSCV 3.0 Lasso CFS
+python run_subprocess.py RegGBSCV 3.0 Ridge CFS
+python run_subprocess.py RegGBSCV 3.0 ElasticNet CFS
+python run_subprocess.py RegGBSCV 3.0 DT CFS
+python run_subprocess.py RegGBSCV 3.0 LGBM CFS
+python run_subprocess.py RegGBSCV 3.0 RF CFS
+python run_subprocess.py RegGBSCV 3.0 MLP CFS
+python run_subprocess.py RegGBSCV 3.0 SVM CFS

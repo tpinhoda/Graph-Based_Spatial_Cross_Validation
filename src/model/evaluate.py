@@ -3,8 +3,10 @@ import os
 from dataclasses import dataclass, field
 from typing import Dict
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import mean_squared_error
+from scipy.stats import spearmanr
 from src.data import Data
 import src.utils as utils
 
@@ -47,6 +49,8 @@ class Evaluate(Data):
     def _read_predictions(self, data_path):
         """Read the prediction data"""
         self.predictions = pd.read_csv(data_path, index_col=self.index_col)
+        self.predictions["PREDICTIONS"] = [max(pred, 0) for pred in self.predictions["PREDICTIONS"]]
+        self.predictions["PREDICTIONS"] = [min(pred, 100) for pred in self.predictions["PREDICTIONS"]]
 
     def _read_train(self, json_path, data):
         """Read the train data"""
@@ -76,7 +80,9 @@ class Evaluate(Data):
             "TRAIN_SIZE": [],
             "TEST_SIZE": [],
             "N_FEATURES": [],
-            "RMSE": [],
+            "MSE": [],
+            "STDE": [],
+            "SP": []
         }
 
     def _initialize_data(self, folds_path, pred_path, fs_path, fold):
@@ -84,6 +90,7 @@ class Evaluate(Data):
         data = pd.read_csv(os.path.join(self.root_path, "data.csv"))
         data.set_index(self.index_col, inplace=True)
         self._read_predictions(os.path.join(pred_path, f"{fold}.csv"))
+        
         self._read_train(os.path.join(folds_path, fold), data)
         self._read_test(os.path.join(folds_path, fold), data)
         self._read_fold_idx_table(os.path.join(folds_path, fold))
@@ -111,8 +118,21 @@ class Evaluate(Data):
         y_true = self.predictions[GROUND_TRUTH_COL]
         y_pred = self.predictions[PRED_COL]
         rmse = mean_squared_error(y_true, y_pred, squared=True)
-        self.metrics["RMSE"].append(rmse)
-
+        self.metrics["MSE"].append(rmse)
+    
+    def _get_stde(self):
+        y_true = self.predictions[GROUND_TRUTH_COL]
+        y_pred = self.predictions[PRED_COL]
+        se = (y_true - y_pred)**2
+        stde = se.std() 
+        self.metrics["STDE"].append(stde)
+        
+    def _get_spearman(self):
+        y_true = self.predictions[GROUND_TRUTH_COL]
+        y_pred = self.predictions[PRED_COL]
+        rho, _ = spearmanr(y_true, y_pred)
+        self.metrics["SP"].append(rho)
+    
     def _calculatemetrics(self, fold):
         self._get_fold_name(fold)
         self._get_train_n_folds()
@@ -120,6 +140,8 @@ class Evaluate(Data):
         self._get_test_size()
         self._get_n_features()
         self._get_rmse()
+        self._get_stde()
+        self._get_spearman()
 
     def _savemetrics(self):
         metrics = pd.DataFrame(self.metrics)
@@ -137,7 +159,10 @@ class Evaluate(Data):
             results_path, "predictions", self.fs_method, self.ml_method
         )
         folds_name = self._get_folders_in_dir(folds_path)
+        #folds_name.remove("53") #Remenber ti remove it
+        folds_name.sort()
         self.metrics = self._init_metrics_dict()
+    
         for fold in tqdm(folds_name, desc="Evaluating predictions"):
             self._initialize_data(folds_path, pred_path, fs_path, fold)
             self._calculatemetrics(fold)

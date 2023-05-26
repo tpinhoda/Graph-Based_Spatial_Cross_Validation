@@ -57,7 +57,7 @@ def _weka_cfs(data, target_col):
     attsel.search(search)
     attsel.evaluator(evaluator)
     attsel.select_attributes(data_weka)
-    index_fs = [i - 1 for i in attsel.selected_attributes]
+    index_fs = [i for i in attsel.selected_attributes]
     jvm.stop()
     return data.columns.values[index_fs].tolist()
 
@@ -66,7 +66,7 @@ def read_data(root_path, dataset_name, index_col, target_col, fold_col):
     """read data"""
     dataset = pd.read_csv(join(root_path, dataset_name, "data.csv"))
     reorganized_cols = [col for col in dataset.columns if col not in [target_col]]
-    reorganized_cols = reorganized_cols[:4000]
+    #reorganized_cols = reorganized_cols[:4000]
     reorganized_cols.append(target_col)
     dataset = dataset[reorganized_cols]
     with contextlib.suppress(KeyError):
@@ -101,13 +101,18 @@ def main(
 
     split_fold_idx = utils.load_json(join(folds_path, fold, "split_data.json"))
     training_data = data.loc[split_fold_idx["train"]].copy()
-    context_data = training_data[training_data[fold_col] == int(context_fold)]
-    jvm.start()
-    context_data.drop([fold_col], axis=1)
-    out_path = _make_folders(output_path, [fold])
-    selected_features = _weka_cfs(context_data, target_col)
-    _save_selected_features(out_path, selected_features, context_fold)
-    jvm.stop()
+    context_data = training_data[training_data[fold_col] == int(context_fold)].copy()
+    if context_data.index.to_list():
+        #jvm.start()
+        context_data.drop(columns=[fold_col], inplace=True)
+        out_path = _make_folders(output_path, [fold])
+        selected_features = _weka_cfs(context_data, target_col)
+        selected_features.remove(target_col)
+        _save_selected_features(out_path, selected_features, context_fold)
+        print(f"SAVED FOLD {fold} -- CONTEXT {context_fold}")
+    else:
+        print(f"CONTEXT {context_fold} Removed for FOLD {fold}")
+    #jvm.stop()
 
 
 if __name__ == "__main__":

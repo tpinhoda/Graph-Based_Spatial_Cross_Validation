@@ -6,8 +6,8 @@ import geopandas as gpd
 from weka.core import jvm
 from src import utils
 from src.pipeline import Pipeline
-from src.visualization.performance import VizMetrics
-from src.visualization.dependence import VizDependence
+#from src.visualization.performance import VizMetrics
+#from src.visualization.dependence import VizDependence
 
 # Set pipeline switchers
 SWITCHERS = {
@@ -15,7 +15,7 @@ SWITCHERS = {
     "fs": False,
     "train": True,
     "predict": True,
-    "evaluate": False,
+    "evaluate": True,
 }
 
 ml_methods = [
@@ -41,8 +41,8 @@ def main(root_path, dataset, fs_method, index_col, index_fold, target_col, ml_me
     data_path = os.path.join(root_path, dataset, "data.csv")
     # Load data
     data = pd.read_csv(data_path, index_col=index_col, low_memory=False)
-    with contextlib.suppress(KeyError):
-        data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
+    #with contextlib.suppress(KeyError):
+    #    data.drop(columns=["[GEO]_LATITUDE", "[GEO]_LONGITUDE"], inplace=True)
         # Run pipeline
     Optimistic = Pipeline(
         root_path=os.path.join(root_path, dataset),

@@ -1,0 +1,11 @@
+{
+    "dataset": "NSW_Election_2019",
+    "meshblock":"meshblock.shp",
+    "meshblock_id": "INDEX",
+    "index_col": "INDEX",
+    "fold_col": "INDEX_FOLDS",
+    "target_col": "TARGET",
+    "fs_method": "CFS",
+    "ml_methods": ["SVM"],
+    "cols_remove": []
+}

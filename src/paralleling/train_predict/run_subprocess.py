@@ -10,8 +10,8 @@ if __name__ == "__main__":
     val_method = sys.argv[1]
     kappa = sys.argv[2]
     ml_method = sys.argv[3]
-    root_path = "/home/tpinho/IJGIS/Datasets/Australia_Election_2019"
-    fs_method = "CFS"
+    root_path = "/home/tpinho/IJGIS/Datasets/USA_Election_2020"
+    fs_method = sys.argv[4]
     index_col = "INDEX"
     target_col = "TARGET"
     fold_col = "INDEX_FOLDS"
@@ -87,22 +87,22 @@ if __name__ == "__main__":
 
     # brazil_datasets = ["Brazil_Election_2018"]
 
-    single = ["US_Corn_Yield_2016_Removed_ALABAMA"]
+    single = ["Original"]
 
     procs = []
-    for dataset_name in australia_datasets:
+    for dataset_name in single:
         if val_method == "TraditionalSCV":
             cmd = f'python traditionalscv.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
-            procs.append(subprocess.Popen(cmd, shell=True))
+            procs.append(subprocess.call(cmd, shell=True))
         if val_method == "Optimistic":
             cmd = f'python optimistic.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
-            procs.append(subprocess.Popen(cmd, shell=True))
+            procs.append(subprocess.call(cmd, shell=True))
         if val_method == "RegGBSCV":
             cmd = f'python reggbscv.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {kappa} {ml_method}'
-            procs.append(subprocess.Popen(cmd, shell=True))
+            procs.append(subprocess.call(cmd, shell=True))
         if val_method == "CrossValidation":
             cmd = f'python cross_validation.py {root_path} "{dataset_name}" {fs_method} {index_col} {fold_col} {target_col} {ml_method}'
-            procs.append(subprocess.Popen(cmd, shell=True))
-    exit_codes = [p.wait() for p in procs]
+            procs.append(subprocess.call(cmd, shell=True))
+    #exit_codes = [p.wait() for p in procs]
     t1_stop = time.process_time()
     print(f"time -- {(t1_start-t1_stop)/60}")

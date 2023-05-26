@@ -72,7 +72,7 @@ class Train(Data):
         """Get the models by name"""
         if self.ml_method == "KNN":
             return MAP_MODELS[self.ml_method](
-                n_neighbors=math.floor(math.sqrt(self.train_data.shape[0]))
+                n_neighbors=3
             )
         if self.ml_method == "MLP":
             return MAP_MODELS[self.ml_method](
@@ -93,13 +93,13 @@ class Train(Data):
         if self.ml_method == "DT":
             return MAP_MODELS[self.ml_method](random_state=1)
         if self.ml_method == "Lasso":
-            return MAP_MODELS[self.ml_method](alpha=0.001, random_state=1)
+            return MAP_MODELS[self.ml_method](alpha=0.01)
         if self.ml_method == "OLS":
             return MAP_MODELS[self.ml_method]()
         if self.ml_method == "Ridge":
-            return MAP_MODELS[self.ml_method](alpha=0.001)
+            return MAP_MODELS[self.ml_method]()
         if self.ml_method == "ElasticNet":
-            return MAP_MODELS[self.ml_method](alpha=0.001)
+            return MAP_MODELS[self.ml_method](alpha=0.01)
         if self.ml_method == "SVM":
             return MAP_MODELS[self.ml_method]()
         return MAP_MODELS[self.ml_method](*params)

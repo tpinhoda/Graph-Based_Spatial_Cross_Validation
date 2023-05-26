@@ -1,0 +1,10 @@
+python run_subprocess.py RegGBSCV 3.0 KNN LatLon
+python run_subprocess.py RegGBSCV 3.0 OLS LatLon
+python run_subprocess.py RegGBSCV 3.0 Lasso LatLon
+python run_subprocess.py RegGBSCV 3.0 Ridge LatLon
+python run_subprocess.py RegGBSCV 3.0 ElasticNet LatLon
+python run_subprocess.py RegGBSCV 3.0 DT LatLon
+python run_subprocess.py RegGBSCV 3.0 LGBM LatLon
+python run_subprocess.py RegGBSCV 3.0 RF LatLon
+python run_subprocess.py RegGBSCV 3.0 MLP LatLon
+python run_subprocess.py RegGBSCV 3.0 SVM LatLon

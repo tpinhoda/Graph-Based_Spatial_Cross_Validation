@@ -43,12 +43,13 @@ class TraditionalSCV(SpatialCV):
         # Calculates sill, variance of the target variable
         self.sill_target = self.data[self.target_col].var()
 
-    def _calculate_buffer_size(self):
+    def _calculate_buffer_size(self): #Valor do lag dist pode estar mto alto!!!!!!
+        #self.data[self.target_col] = self.data[self.target_col] * 100 
         # Calculate the size of the removing buffer
         tmin = -9999.0
         tmax = 9999.0  # no trimming
-        lag_dist = 0.3
-        lag_tol = 0.15
+        lag_dist = 0.6  # 0.3
+        lag_tol = 0.3 # 0.15
         nlag = 100
         # maximum lag is 700m and tolerance > 1/2 lag distance for smoothing
         bandh = 9999.9
@@ -70,7 +71,9 @@ class TraditionalSCV(SpatialCV):
             bandh,
             isill,
         )
+        
         range = [(h, g) for h, g in zip(lag, gamma) if g > self.sill_target]
+        print(f"Range:{range}")
         return range[0][0]
 
     def _calculate_buffer(self, buffer_size):
@@ -86,7 +89,7 @@ class TraditionalSCV(SpatialCV):
 
     def _generate_x_y(self):
         self.meshblocks.index = self.meshblocks.index.astype(self.data.index.dtype)
-
+        self.meshblocks.dropna(subset=["geometry"], inplace=True, axis=0)
         if not self.meshblocks.crs:
             self.meshblocks = self.meshblocks.set_crs(4326, allow_override=True)
         self.meshblocks["x"] = (
@@ -100,7 +103,7 @@ class TraditionalSCV(SpatialCV):
             .apply(lambda p: p.y)
         )
         self.data = self.data.join(self.meshblocks[["x", "y"]])
-
+    
     def run(self) -> None:
         """Generate ultra-conservartive spatial folds"""
         # Create folder folds
@@ -110,7 +113,7 @@ class TraditionalSCV(SpatialCV):
         self._generate_x_y()
         self._calculate_sill()
         buffer_size = self._calculate_buffer_size()
-
+        print(buffer_size)
         for fold_name, test_data in tqdm(
             self.data.groupby(by=self.fold_col), desc="Creating folds"
         ):

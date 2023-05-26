@@ -10,6 +10,7 @@ from weka.attribute_selection import ASEvaluation, ASSearch, AttributeSelection
 from weka.core.dataset import create_instances_from_matrices
 from src.data import Data
 from src import utils
+from src.feature_selection import cfs_git
 
 
 @dataclass
@@ -44,7 +45,7 @@ class FeatureSelection(Data):
         """Position the target column in the dataset last position"""
         if self.cols_remove:
             data.drop(columns=self.cols_remove, inplace=True)
-        cols = [c for c in data.columns if c != self.target_col]
+        cols = [c for c in data.columns if c not in [self.target_col, self.fold_col]]
         
         return data[cols + [self.target_col]]
 
@@ -77,8 +78,20 @@ class FeatureSelection(Data):
         attsel.search(search)
         attsel.evaluator(evaluator)
         attsel.select_attributes(data_weka)
-        index_fs = [i - 1 for i in attsel.selected_attributes]
+        index_fs = [i for i in attsel.selected_attributes]
         return data.columns.values[index_fs].tolist()
+    
+    def _python_cfs(self, data) -> List:
+        """Runs CFS method from python script"""
+        print("entrou")
+        features  = data.drop(columns=[self.target_col]).columns.to_list()
+        features = cfs_git.cfs(data[features].to_numpy(), data[self.target_col].to_numpy())
+        print(features)
+        exit()
+        return features
+    
+    def _latlon(self):
+        return ["[GEO]_LATITUDE", "[GEO]_LONGITUDE", self.target_col]
 
     def _save_selected_features(self, features, fold):
         """Save the list of selected features in a json file"""
@@ -107,12 +120,17 @@ class FeatureSelection(Data):
             training_data = self._data.loc[split_fold_idx["train"]].copy()
             if self.fs_method == "CFS":
                 selected_features = self._weka_cfs(training_data)
+            elif self.fs_method == "CFS_Python":
+                selected_features = self._python_cfs(training_data)
             elif self.fs_method == "Pearson":
                 selected_features = self._cor_fs(training_data)
             elif self.fs_method == "All":
                 selected_features = self._all_fs(training_data)
+            elif self.fs_method == "LatLon":
+                selected_features = self._latlon()
             else:
                 continue
+            selected_features.remove(self.target_col)
             self._save_selected_features(selected_features, fold)
 
         if self.fs_method == "CFS":

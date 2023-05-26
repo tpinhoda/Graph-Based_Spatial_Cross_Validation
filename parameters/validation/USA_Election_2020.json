@@ -1,0 +1,11 @@
+{
+    "dataset": "USA_Election_2020",
+    "meshblock":"meshblocks.shp",
+    "meshblock_id": "GEOID",
+    "index_col": "INDEX",
+    "fold_col": "INDEX_FOLDS",
+    "target_col": "TARGET",
+    "fs_method": "LatLon",
+    "ml_methods": ["KNN"],
+    "cols_remove": []
+}

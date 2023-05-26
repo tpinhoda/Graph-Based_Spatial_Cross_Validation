@@ -138,7 +138,21 @@ class RegGraphBasedSCV(SpatialCV):
     @staticmethod
     def _calculate_gamma(similarity, geo_weights, kappa) -> np.float64:
         """Calculate gamma or the semivariogram"""
-        gamma_dist = similarity - (kappa * (1 - geo_weights) * similarity)
+        nsw_range = 0.10166028608475246
+        nsw_penalizer = 9.836682922240815
+        qld_range = 0.17121910876322904
+        qld_penalizer = 5.840469601923075
+        brazil_range = 0.3278496130551567
+        brazil_penalizer = 3.0501789850572805
+        usa_range = 0.06410301444756943
+        usa_penalizer = 15.599890404809452
+        
+        mask = np.where(geo_weights<usa_range,0,usa_penalizer*kappa) #can be paramenters
+        geo_weights_new = np.multiply(geo_weights,mask)
+        #print(geo_weights)
+        #print(geo_weights_new)
+        gamma_dist = similarity  +  geo_weights_new
+        #gamma_dist = similarity - (kappa * (1 - geo_weights) * similarity)
         sum_diff = np.sum(gamma_dist)
         sum_dist = len((similarity))
         return sum_diff / (2 * sum_dist)
@@ -151,12 +165,16 @@ class RegGraphBasedSCV(SpatialCV):
         """Calculate the semivariogram by folds"""
         nodes_gamma = {}
         neighbors = [n for n in neighbors if n in self.train_data.index]
+        kappa = self.test_data[attribute].var() + self.data[attribute].var()
         neighbors_data = self.train_data.loc[neighbors]
         for index, node_data in neighbors_data.iterrows():
             similarity = self._calculate_similarity_matrix(node_data, attribute)
             geo_weights = self._get_neighbors_weights(index)
             gamma = self._calculate_gamma(similarity, geo_weights, kappa)
             nodes_gamma[index] = gamma
+        #print(kappa)
+        #print("=====================================")
+        #print(nodes_gamma)
         return nodes_gamma
 
     def _get_n_fold_neighbohood(self) -> int:
@@ -199,7 +217,7 @@ class RegGraphBasedSCV(SpatialCV):
 
     def _calculate_removing_buffer(self, nodes_propagated, nodes_reduced, attribute):
         """Calculate buffer nodes"""
-        sill_target = self.test_data[attribute].var()
+        sill_target = (self.test_data[attribute].var() + self.data[attribute].var())/2
         # sill_w_matrix = self.w_matrix.to_numpy().var()
         sill_reduced = self.test_data[X_1DIM_COL].var()
 
@@ -208,9 +226,9 @@ class RegGraphBasedSCV(SpatialCV):
         buffered_nodes_target = [
             node for node, gamma in nodes_propagated.items() if gamma < sill_target
         ]
-        buffered_nodes_reduced = [
-            node for node, gamma in nodes_reduced.items() if gamma < sill_reduced
-        ]
+        #buffered_nodes_reduced = [
+        #    node for node, gamma in nodes_reduced.items() if gamma < sill_reduced
+        #]
         # return [node for node in buffered_nodes_target if node in buffered_nodes_reduced]
         return buffered_nodes_target
 
@@ -234,15 +252,16 @@ class RegGraphBasedSCV(SpatialCV):
                 # Ensure indexes and columns compatibility
                 self._convert_adj_matrix_index_types()
                 # Calculate selection buffer
-                nodes_prop_reduced = self._propagate_variance(X_1DIM_COL, self.kappa)
-                selection_buffer = self._calculate_selection_buffer(
-                    nodes_prop_reduced, X_1DIM_COL
-                )
-                if self.run_selection:
-                    self.train_data = self.train_data.loc[selection_buffer]
+                #nodes_prop_reduced = self._propagate_variance(X_1DIM_COL, self.kappa)
+                #selection_buffer = self._calculate_selection_buffer(
+                #    nodes_prop_reduced, X_1DIM_COL
+                #)
+                #if self.run_selection:
+                #    self.train_data = self.train_data.loc[selection_buffer]
                 # The train data is used to calcualte the buffer. Thus, the size tree,
                 # and the gamma calculation will be influenced by the selection buffer.
                 # Calculate removing buffer
+                nodes_prop_reduced = []
                 nodes_prop_target = self._propagate_variance(
                     self.target_col, self.kappa
                 )
